@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "include/logger.h"
 #include "include/filer.h"
-#include "include/scorer.h"
+#include "scorer.h"
 #include "include/in_state_factory.h"
 #include "include/play_state_factory.h"
 #include "include/matrix_factory.h"

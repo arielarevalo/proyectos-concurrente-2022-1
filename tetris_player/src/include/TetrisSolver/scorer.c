@@ -5,7 +5,7 @@
 #include "include/logger.h"
 #include "include/matrix_factory.h"
 #include "include/play_state_factory.h"
-#include "include/scorer.h"
+#include "scorer.h"
 
 static const double C_HEIGHT = -0.798752914564018;  // a
 static const double C_LINES = 0.522287506868767;  // b
@@ -109,116 +109,4 @@ void clear_history(play_state **history, int final_depth) {
         }
         history[i] = NULL;
     }
-}
-
-unsigned int score(matrix *play_area) {
-    int complete_lines = get_complete_lines(play_area);
-    int height = get_height(play_area, complete_lines);
-    int holes = get_holes(play_area, complete_lines);
-    int bumpiness = get_bumpiness(play_area, complete_lines);
-
-    return height * C_HEIGHT +
-           complete_lines * C_LINES +
-           holes * C_HOLES +
-           bumpiness * C_BUMPY;
-}
-
-int get_complete_lines(matrix *play_area) {
-    int i;  // Incomplete lines
-    int cont = 1;
-    for (i = play_area->num_rows; i > 0; --i) {
-        for (int j = 0; j < play_area->num_cols && cont; ++j) {
-            if ('0' == play_area->value[i - 1][j]) {
-                cont = 0;
-            }
-        }
-
-        if (!cont) {  // Skip last --i
-            break;
-        }
-    }
-
-    return play_area->num_rows - i;
-}
-
-int get_height(matrix *play_area, int complete_lines) {
-    int height_sum = 0;
-    int area_height = play_area->num_rows;
-    int end_height = area_height - complete_lines;
-
-    for (int j = 0; j < play_area->num_cols; ++j) {
-        int highest_cell = end_height;
-
-        for (int i = 0; i < end_height; ++i) {
-            char current = play_area->value[i][j];
-
-            if ('0' != current) {
-                highest_cell = i;
-                break;
-            }
-        }
-        height_sum += area_height - highest_cell;
-    }
-
-    return height_sum;
-}
-
-// Takado8's code defines a hole as any empty space under a filled cell.
-int get_holes(matrix *play_area, int complete_lines) {
-    int holes = 0;
-    int start_count = 0;
-
-    for (int j = 0; j < play_area->num_cols; ++j) {
-        for (int i = 0; i < play_area->num_rows - complete_lines; ++i) {
-            char current = play_area->value[i][j];
-
-            if ('0' != current) {
-                start_count = 1;
-            }
-            if (start_count && '0' == current) {
-                ++holes;
-            }
-        }
-        start_count = 0;
-    }
-
-    return holes;
-}
-
-int get_bumpiness(matrix *play_area, int complete_lines) {
-    int bumpiness = 0;
-    int end_height = play_area->num_rows - complete_lines;
-
-    // Cannot compare column 0 to the anything
-    int prev_highest_cell = end_height;
-    for (int i = 0; i < end_height; ++i) {
-        char current = play_area->value[i][0];
-
-        if ('0' != current) {
-            prev_highest_cell = i;
-            break;
-        }
-    }
-
-    // Compare to the left
-    for (int j = 1; j < play_area->num_cols; ++j) {
-        int highest_cell = end_height;
-
-        for (int i = 0; i < end_height; ++i) {
-            char current = play_area->value[i][j];
-
-            if ('0' != current) {
-                highest_cell = i;
-                break;
-            }
-        }
-
-        // Sign is irrelevant
-        int diff = highest_cell - prev_highest_cell;
-        prev_highest_cell = highest_cell;
-
-        bumpiness += diff > 0 ? diff : -diff;
-    }
-
-    return bumpiness;
 }

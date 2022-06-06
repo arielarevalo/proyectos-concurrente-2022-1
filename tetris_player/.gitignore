@@ -37,7 +37,7 @@ cmake-build-debug/
 *.exe
 *.out
 *.app
-*.i*86
+*.h*86
 *.x86_64
 *.hex
 
