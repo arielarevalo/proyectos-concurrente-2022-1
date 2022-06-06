@@ -9,19 +9,19 @@
 class Logger
 {
 public:
-	static void log_info(const std::string& message);
+	static void info(const std::string& message) ;
 
-	static void log_error(const std::string& message);
+	static void error(const std::string& message) ;
 };
 
-void Logger::log_info(const std::string& message)
+void Logger::info(const std::string& message)
 {
 	time_t now;
 	std::time(&now);
 	std::cout << std::ctime(&now) << "[INFO]: " << message << std::endl;
 }
 
-void Logger::log_error(const std::string& message)
+void Logger::error(const std::string& message)
 {
 	time_t now;
 	std::time(&now);

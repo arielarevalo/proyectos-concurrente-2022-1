@@ -1,5 +1,9 @@
 # Tetris Solver
 
+    Los miembros del equipo elaboran el documento de análisis en un README.md, en el cual debe quedar claro a un lector ajeno al proyecto, el problema que se resuelve, y quienes son los integrantes del equipo. Proveer además un manual de uso, que incluye cómo compilar el programa y cómo correrlo (por ejemplo, explicar los argumentos en línea de comandos que recibe) y cómo detenerlo (tanto con Ctrl+C como el comando kill).
+    El documento puede incluir también capturas de pantallas o videos de la ejecución, ya sea en la terminal o utilizando la interfaz gráfica dada por el profesor (ver sección de pruebas).
+    En el documento de análisis para el proyecto, agregue una sección de diseño y un enlace el documento de diseño. Esto permitirá la navegabilidad desde la raíz del repositorio al proyecto 01, y de éste hacia su diseño.
+
 Este proyecto consiste en un programa capaz de resolver una jugada de
 Tetris, con el problema enunciado de la siguiente forma:
 
@@ -58,13 +62,13 @@ L
 S
 ```
 
-Con un archivo de entrada `archivo.txt` procedemos a compilar el programa con el comando `make`, y podemos
-correrlo para nuestro archivo ejecutando
+Con un archivo de entrada `archivo.txt` procedemos a compilar el programa con el
+comando `make`, y podemos correrlo para nuestro archivo ejecutando
 `./bin/tetris_solver_serial [Path]/archivo.txt`. Cabe destacar que el programa
-solamente se puede correr con un archivo.
-Seguidamente, se estarán almacenando en el directorio `output` los archivos que
-representan las movidas las cuales hacer para obtener la mayor cantidad de
-puntos. Como ejemplo de archivo de salida, se presenta el siguiente:
+solamente se puede correr con un archivo. Seguidamente, se estarán
+almacenando en el directorio `output` los archivos que representan las
+movidas las cuales hacer para obtener la mayor cantidad de puntos. Como
+ejemplo de archivo de salida, se presenta el siguiente:
 
 ```
 tetris_play_0.txt

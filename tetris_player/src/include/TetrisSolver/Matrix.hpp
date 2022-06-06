@@ -38,6 +38,8 @@ public:
 
 	std::string& operator[](size_t i);
 
+	const std::string& operator[](size_t i) const;
+
 	const size_t rows;
 	const size_t cols;
 private:
@@ -61,6 +63,11 @@ void Matrix::print(std::ofstream& file) const
 }
 
 std::string& Matrix::operator[](size_t i)
+{
+	return value[i];
+}
+
+const std::string& Matrix::operator[](size_t i) const
 {
 	return value[i];
 }

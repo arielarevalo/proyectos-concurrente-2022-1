@@ -14,9 +14,11 @@ static const int TWO_ROTATIONS{ 2 };
 static const int FOUR_ROTATIONS{ 4 };
 static const int INVALID_ROTATIONS{ -1 };
 
-class Tetrimino {
+class Tetrimino
+{
 public:
-	enum class Figures {
+	enum class Figure
+	{
 		I, Z, S, L, J, O, T
 	};
 
@@ -28,12 +30,19 @@ public:
 	static const std::array<Tetrimino, ONE_ROTATION> O;
 	static const std::array<Tetrimino, FOUR_ROTATIONS> T;
 
-	static int getTetriminoRotations(Figures figure);
+	Tetrimino() = delete;
+	Tetrimino(const Tetrimino&) = delete;
+	Tetrimino& operator=(const Tetrimino&) = delete;
+	Tetrimino& operator=(Tetrimino&&) = delete;
 
-	static const Tetrimino& getTetrimino(size_t rotation, Figures figure);
+	static int getTetriminoRotations(Figure figure);
+
+	static const Tetrimino& getTetrimino(size_t rotation, Figure figure);
 
 	static std::vector<size_t> findBounds(size_t h, size_t w,
 			const std::vector<std::string>& value) noexcept;
+
+	static Figure charToEnum(char c);
 
 	const size_t height{ 0 };
 	const size_t width{ 0 };
@@ -42,10 +51,13 @@ public:
 	const std::vector<std::string>& value;
 
 private:
-	Tetrimino(size_t h, size_t w, char c, const std::vector<std::string>& value)
-	noexcept
-			: height(h), width(w), character(c),
-			bounds(findBounds(h, w, value)), value(value) { }
+	Tetrimino(Tetrimino&&) noexcept = default;
+	Tetrimino(size_t h, size_t w, char c,
+			const std::vector<std::string>& value) noexcept
+			:height(h), width(w), character(c),
+			 bounds(findBounds(h, w, value)), value(value)
+	{
+	}
 };
 
 const std::array<Tetrimino, TWO_ROTATIONS> Tetrimino::I{
@@ -87,18 +99,19 @@ const std::array<Tetrimino, FOUR_ROTATIONS> Tetrimino::T{
 		Tetrimino({ 3, 2, 'T', { "07", "77", "07" }})
 };
 
-int Tetrimino::getTetriminoRotations(Tetrimino::Figures figure)
+int Tetrimino::getTetriminoRotations(Tetrimino::Figure figure)
 {
-	switch (figure) {
-	case Figures::I:
-	case Figures::Z:
-	case Figures::S:
+	switch (figure)
+	{
+	case Figure::I:
+	case Figure::Z:
+	case Figure::S:
 		return TWO_ROTATIONS;
-	case Figures::L:
-	case Figures::J:
-	case Figures::T:
+	case Figure::L:
+	case Figure::J:
+	case Figure::T:
 		return FOUR_ROTATIONS;
-	case Figures::O:
+	case Figure::O:
 		return ONE_ROTATION;
 	default:
 		return INVALID_ROTATIONS;
@@ -106,28 +119,30 @@ int Tetrimino::getTetriminoRotations(Tetrimino::Figures figure)
 }
 
 const Tetrimino& Tetrimino::getTetrimino(size_t rotation,
-		Tetrimino::Figures figure)
+		Tetrimino::Figure figure)
 {
 	int maxRotations = getTetriminoRotations(figure);
 
-	if (rotation>=maxRotations) {
+	if (rotation >= maxRotations)
+	{
 		throw std::invalid_argument("rotation");
 	}
 
-	switch (figure) {
-	case Figures::I:
+	switch (figure)
+	{
+	case Figure::I:
 		return I[rotation];
-	case Figures::Z:
+	case Figure::Z:
 		return Z[rotation];
-	case Figures::S:
+	case Figure::S:
 		return S[rotation];
-	case Figures::L:
+	case Figure::L:
 		return L[rotation];
-	case Figures::J:
+	case Figure::J:
 		return J[rotation];
-	case Figures::T:
+	case Figure::T:
 		return T[rotation];
-	case Figures::O:
+	case Figure::O:
 		return O[rotation];
 	default:
 		throw std::invalid_argument("figure");
@@ -139,13 +154,39 @@ std::vector<size_t> Tetrimino::findBounds(size_t h, size_t w,
 {
 	std::vector<size_t> bounds(w);
 
-	for (size_t j = 0; j<w; ++j) {
-		for (size_t i = 0; i<h; ++i) {
-			if (i+1==h || ('0'!=value[i][j] && '0'==value[i+1][j])) {
+	for (size_t j = 0; j < w; ++j)
+	{
+		for (size_t i = 0; i < h; ++i)
+		{
+			if (i + 1 == h || ('0' != value[i][j] && '0' == value[i + 1][j]))
+			{
 				bounds[j] = i;
 				break;
 			}
 		}
 	}
 	return bounds;
+}
+
+Tetrimino::Figure Tetrimino::charToEnum(char c)
+{
+	switch (c)
+	{
+	case 'I':
+		return Figure::I;
+	case 'Z':
+		return Figure::Z;
+	case 'S':
+		return Figure::S;
+	case 'L':
+		return Figure::L;
+	case 'J':
+		return Figure::J;
+	case 'T':
+		return Figure::T;
+	case 'O':
+		return Figure::O;
+	default:
+		throw std::invalid_argument("character");
+	}
 }

@@ -1,4 +1,9 @@
+
 # Diseño Tetris Player
+
+    Su solución debe tener un buen diseño concurrente expresado mediante diagramas de flujo de datos y UML.
+    Su diseño debe ser concreto y mostrar el flujo de datos de entrada y salida, incluyendo nombres de los métodos más importantes. En el diagrama UML debe quedar claro cuáles fueron todas las clases utilizadas y sus atributos. Los diseños deben guardarse en la carpeta design/ dentro de su proyecto 1.
+    Al leer el documento de diseño, una persona desarrolladora tendrá una comprensión de alto nivel de la solución. Es muy útil para la fase de implementación o para futuros miembros de un equipo con el fin de poder comprender el diseño de la solución.
 
 ## Requisitos
 

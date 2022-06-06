@@ -4,14 +4,15 @@
 
 #include <cstdint>
 #include <utility>
-#include "GameState.h"
-#include "Matrix.h"
-#include "Tetrimino.h"
+#include "./GameState.hpp"
+#include "./Matrix.hpp"
+#include "./Tetrimino.hpp"
 
 /**
  * A single state of a game of Tetris.
  */
-class PlayState {
+class PlayState
+{
 public:
 	/**
 	 * @brief Creates a new play_state structure.
@@ -20,7 +21,9 @@ public:
 	 */
 	explicit PlayState(const GameState& gameState)
 			:id(gameState.id),
-			 playArea(gameState.playArea) { }
+			 playArea(gameState.playArea)
+	{
+	}
 
 	/**
 	 * @brief Attempts to add a new tetrimino to the passed play_state.
@@ -31,7 +34,9 @@ public:
 	 * @param column Column of the play_area at which to attempt to add the tetrimino
 	 * @return Whether place was successful
 	 */
-	bool place(const Tetrimino& tetrimino, int rotation, size_t column);
+	bool place(Tetrimino::Figure figure, int rotation, size_t column);
+
+	unsigned int score() const;
 
 	uint64_t getId() const;
 
@@ -51,18 +56,22 @@ private:
 	Matrix playArea;
 };
 
-bool PlayState::place(const Tetrimino& tetrimino,
-		int rotation,
-		size_t column)
+bool PlayState::place(Tetrimino::Figure figure, int rotation, size_t column)
 {
-	if (tetrimino.width>playArea.cols-column) {
+	const Tetrimino& tetrimino{Tetrimino::getTetrimino(rotation, figure)};
+
+	if (tetrimino.width > playArea.cols - column)
+	{
 		return false;
 	}
 
 	/* Confirm space is open for tet at the top */
-	for (size_t j{ 0 }; j<tetrimino.width; ++j) {
-		for (size_t i{ 0 }; i<=tetrimino.bounds[j]; ++i) {
-			if ('0'!=playArea[i][j+column]) {
+	for (size_t j{ 0 }; j < tetrimino.width; ++j)
+	{
+		for (size_t i{ 0 }; i <= tetrimino.bounds[j]; ++i)
+		{
+			if ('0' != playArea[i][j + column])
+			{
 				return false;
 			}
 		}
@@ -73,37 +82,61 @@ bool PlayState::place(const Tetrimino& tetrimino,
      * "d" is the displacement of the tetrimino from the initial position. */
 	size_t d{ 0 };
 	bool cont{ true };
-	for (;; ++d) {
-		for (size_t j{ 0 }; j<tetrimino.width; ++j) {
-			if (tetrimino.bounds[j]+d+1>=playArea.rows ||
-					'0'!=playArea[tetrimino.bounds[j]+d+1][j+column]) {
+	for (;; ++d)
+	{
+		for (size_t j{ 0 }; j < tetrimino.width; ++j)
+		{
+			if (tetrimino.bounds[j] + d + 1 >= playArea.rows ||
+					'0' != playArea[tetrimino.bounds[j] + d + 1][j + column])
+			{
 				cont = false;
 			}
 		}
 
-		if (!cont) {  // Skip last ++d
+		if (!cont)
+		{  // Skip last ++d
 			break;
 		}
 	}
 
 	/* Paint the play_area with the nominal values of the tetrimino shape
 	 * plus some displacement "d". */
-	for (size_t i{ 0 }; i<tetrimino.height; ++i) {
-		for (size_t j{ 0 }; j<tetrimino.width; ++j) {
+	for (size_t i{ 0 }; i < tetrimino.height; ++i)
+	{
+		for (size_t j{ 0 }; j < tetrimino.width; ++j)
+		{
 			char currentValue{ tetrimino.value[i][j] };
-			if ('0'!=currentValue) {
-				playArea[i+d][j+column] = currentValue;
+			if ('0' != currentValue)
+			{
+				playArea[i + d][j + column] = currentValue;
 			}
 		}
 	}
 
-	lastTetrimino = tetrimino.character;
 	lastRotation = rotation;
+	lastTetrimino = tetrimino.character;
 
-	return EXIT_SUCCESS;
+	return true;
 }
 
+unsigned int PlayState::score() const
+{
+	unsigned int score{0};
 
+	for (size_t i{0}; i < playArea.rows; ++i) {
+		unsigned int sum{0};
+		for (size_t j{0}; j < playArea.cols; ++j) {
+			if (playArea[i][j] != '0') {
+				++sum;
+			}
+		}
+		if (sum > 0) {
+			score += sum * i * i;
+		}
+	}
+
+	return score;
+}
 
 uint64_t PlayState::getId() const
 {
