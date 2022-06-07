@@ -48,7 +48,7 @@ public:
 	const size_t width{ 0 };
 	const char character{ ' ' };
 	const std::vector<size_t> bounds;
-	const std::vector<std::string>& value;
+	const std::vector<std::string> value;
 
 private:
 	Tetrimino(Tetrimino&&) noexcept = default;

@@ -13,7 +13,7 @@
 #include <functional>
 #include <string>
 #include <vector>
-#include "./include/TetrisSolverSerial.hpp"
+#include "./TetrisSolverSerial.hpp"
 #include "./Logger.hpp"
 
 class FileWatcher
@@ -26,8 +26,8 @@ public:
 private:
 	void listFiles();
 
-	const std::string pathToWatch{ "./input" };
-	const std::string validTxt{ pathToWatch + "/tetris_state.txt" };
+	const std::string inPath{ "./input" };
+	const std::string targetFileName{ inPath + "/tetris_state.txt" };
 
 	std::vector<std::filesystem::path> paths{};
 	bool running{ true };
@@ -40,10 +40,14 @@ FileWatcher::FileWatcher()
 
 void FileWatcher::listFiles()
 {
+	if(!std::filesystem::exists(inPath)) {
+		std::filesystem::create_directory(inPath);
+	}
+
 	paths.clear();
 
 	for (auto& file : std::filesystem::recursive_directory_iterator(
-			pathToWatch))
+			inPath))
 	{
 		paths.push_back(file.path());
 	}
@@ -59,7 +63,7 @@ void FileWatcher::start()
 		{
 			if (std::filesystem::exists(path)
 					&& std::filesystem::is_regular_file(
-							std::filesystem::path(path)) && path == validTxt)
+							std::filesystem::path(path)) && path == targetFileName)
 			{
 				Logger::info("Found tetris game state file.");
 				std::ifstream file{ path };

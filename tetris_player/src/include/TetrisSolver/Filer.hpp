@@ -31,7 +31,12 @@ public:
 	 * @return 1 if successful, 0 if unsuccessful
 	 */
 	static void write(std::vector<PlayState> history);
+
+private:
+	static const std::string outPath;
 };
+
+const std::string Filer::outPath{"./output"};
 
 GameState Filer::read(std::ifstream& file)
 {
@@ -84,11 +89,16 @@ GameState Filer::read(std::ifstream& file)
 
 void Filer::write(std::vector<PlayState> history)
 {
-	std::filesystem::remove_all("./output");
+	if(!std::filesystem::exists(outPath)) {
+		std::filesystem::create_directory(outPath);
+	} else {
+		std::filesystem::remove_all(outPath);
+	}
+
 	const size_t initialSize{ history.size() };
 	for (size_t i{ 0 }; i < initialSize; ++i)
 	{
-		std::string filename{ "./output/tetris_play_"
+		std::string filename{ "./bin/output/tetris_play_"
 									  + std::to_string(i)
 									  + ".txt" };
 

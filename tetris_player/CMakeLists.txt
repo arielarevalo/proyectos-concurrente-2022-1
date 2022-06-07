@@ -5,4 +5,4 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(tetris_player src/Main.cpp)
 
-target_include_directories(tetris_player PRIVATE ./src/include)
+target_include_directories(tetris_player PUBLIC ./src/include)
