@@ -26,8 +26,8 @@ public:
 private:
 	void listFiles();
 
-	const std::string inPath{ "./input" };
-	const std::string targetFileName{ inPath + "/tetris_state.txt" };
+	const std::string putPath{ "./put" };
+	const std::string targetFileName{ putPath + "/tetris_state.txt" };
 
 	std::vector<std::filesystem::path> paths{};
 	bool running{ true };
@@ -35,19 +35,18 @@ private:
 
 FileWatcher::FileWatcher()
 {
+	std::filesystem::remove_all(putPath);
+	std::filesystem::create_directory(putPath);
+
 	listFiles();
 }
 
 void FileWatcher::listFiles()
 {
-	if(!std::filesystem::exists(inPath)) {
-		std::filesystem::create_directory(inPath);
-	}
-
 	paths.clear();
 
 	for (auto& file : std::filesystem::recursive_directory_iterator(
-			inPath))
+			putPath))
 	{
 		paths.push_back(file.path());
 	}
@@ -65,6 +64,7 @@ void FileWatcher::start()
 					&& std::filesystem::is_regular_file(
 							std::filesystem::path(path)) && path == targetFileName)
 			{
+				Logger::setStart();
 				Logger::info("Found tetris game state file.");
 				std::ifstream file{ path };
 				TetrisSolverSerial::play(file);

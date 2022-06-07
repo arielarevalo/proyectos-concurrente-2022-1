@@ -84,8 +84,7 @@ bool Solver::findChildren(const PlayState& parent, int parentDepth)
 		{
 			bool isChildHighScore{ false };
 
-			PlayState temp{ parent };
-			if (temp.place(nextTetrimino, r, c))
+			if (PlayState temp{ parent }; temp.place(nextTetrimino, r, c))
 			{
 				isChildHighScore = findBestMoves(temp, currentDepth);
 			}

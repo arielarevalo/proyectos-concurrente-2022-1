@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <cstring>
 #include "./GameState.hpp"
 #include "./Logger.hpp"
 #include "./PlayState.hpp"
@@ -33,10 +34,10 @@ public:
 	static void write(std::vector<PlayState> history);
 
 private:
-	static const std::string outPath;
+	static const std::string putPath;
 };
 
-const std::string Filer::outPath{"./output"};
+const std::string Filer::putPath{ "./put"};
 
 GameState Filer::read(std::ifstream& file)
 {
@@ -89,24 +90,25 @@ GameState Filer::read(std::ifstream& file)
 
 void Filer::write(std::vector<PlayState> history)
 {
-	if(!std::filesystem::exists(outPath)) {
-		std::filesystem::create_directory(outPath);
-	} else {
-		std::filesystem::remove_all(outPath);
-	}
+	std::filesystem::remove_all(putPath);
+	std::filesystem::create_directory(putPath);
 
 	const size_t initialSize{ history.size() };
 	for (size_t i{ 0 }; i < initialSize; ++i)
 	{
-		std::string filename{ "./bin/output/tetris_play_"
+		std::string filename{ "../bin/put/tetris_play_"
 									  + std::to_string(i)
 									  + ".txt" };
 
-		const PlayState& current{ history.back() };
+		PlayState current{ history.back() };
 
 		std::ofstream file;
 
 		file.open(filename);
+		if (file.fail() || file.bad()) {
+			Logger::error(filename + " could not be opened.");
+			throw std::ios_base::failure(strerror(errno));
+		}
 		file << current.getId() << std::endl;
 		file << current.getLastTetrimino() << std::endl;
 		file << current.getLastRotation() << std::endl;
