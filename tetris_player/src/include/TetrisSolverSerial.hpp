@@ -6,9 +6,9 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "./Filer.hpp"
-#include "./GameState.hpp"
-#include "./Solver.hpp"
+#include "TetrisSolver/Filer.hpp"
+#include "TetrisSolver/GameState.hpp"
+#include "TetrisSolver/Solver.hpp"
 
 class TetrisSolverSerial {
 public:

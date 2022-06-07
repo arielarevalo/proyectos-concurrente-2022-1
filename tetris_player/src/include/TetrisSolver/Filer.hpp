@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cstddef>
+#include <filesystem>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -83,6 +84,7 @@ GameState Filer::read(std::ifstream& file)
 
 void Filer::write(std::vector<PlayState> history)
 {
+	std::filesystem::remove_all("./output");
 	const size_t initialSize{ history.size() };
 	for (size_t i{ 0 }; i < initialSize; ++i)
 	{
