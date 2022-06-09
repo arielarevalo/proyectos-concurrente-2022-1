@@ -103,9 +103,5 @@ I
 ## Créditos
 
 El programa fue desarrollado en su totalidad por Ariel Arévalo Alvarado
-<ariel.arevalo@ucr.ac.cr>, con la heurística utilizada para puntuar los
-estados de juego de Tetris tomada de
-[un proyecto de Takado8](https://github.com/takado8/Tetris), y un logger
-simple [tomado de Stack overflow](https://stackoverflow.com/questions/6508461/logging-library-for-c)
-a nombre de Edwin Buck.
+<ariel.arevalo@ucr.ac.cr> y Pablo Madrigal Ramírez <pablo.madrigalramirez@ucr.ac.cr>
 
