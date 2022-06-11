@@ -2,17 +2,13 @@ cmake_minimum_required(VERSION 3.22)
 project(tetris_player)
 
 set(CMAKE_CXX_STANDARD 17)
+SET (CMAKE_CXX_COMPILER /usr/bin/clang++)
 set(CMAKE_C_FLAGS -Wall -Wextra)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./bin)
 
 set(SOURCES_DIR ./src)
 set(INCLUDE_DIR ${SOURCES_DIR}/include)
 set(TARGET_SOURCES ${SOURCES_DIR}/Main.cpp)
 
-set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-find_package(Threads REQUIRED)
-link_libraries(Threads::Threads)
 include_directories(${INCLUDE_DIR})
 
 set(DEFAULT_TARGET ${CMAKE_PROJECT_NAME})

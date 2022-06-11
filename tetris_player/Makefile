@@ -1,14 +1,14 @@
 APPNAME=$(shell basename $(shell pwd))
-HEADERS=$(wildcard src/include/*.h)
-SOURCES=$(wildcard src/*.c)
+ALLFILES=./src/*.* ./src/*/*.*
 EXEFILE=bin/$(APPNAME)
 
 LINTFILTERS=$\
-	-build/c++11,$\
+	-build/c++17,$\
 	-build/header_guard,$\
 	-build/include_subdir,$\
 	-readability/casting,$\
-	-runtime/references
+	-runtime/references,$\
+	-whitespace
 
 .PHONY: memcheck
 memcheck:
@@ -20,4 +20,4 @@ helgrind:
 
 .PHONY: lint
 lint:
-	cpplint --filter=$(LINTFILTERS) $(HEADERS) $(SOURCES)
+	cpplint --filter=$(LINTFILTERS) $(ALLFILES)

@@ -34,10 +34,10 @@ public:
 	static void write(std::vector<PlayState> history);
 
 private:
-	static const char initialPath[7];
+	static const char INITIAL_PATH[7];
 };
 
-const char Filer::initialPath[7]{ "./put/" };
+const char Filer::INITIAL_PATH[7]{ "./put/" };
 
 GameState Filer::read(std::ifstream& file)
 {
@@ -90,8 +90,8 @@ GameState Filer::read(std::ifstream& file)
 
 void Filer::write(std::vector<PlayState> history)
 {
-	std::filesystem::remove_all(initialPath);
-	std::filesystem::create_directory(initialPath);
+	std::filesystem::remove_all(INITIAL_PATH);
+	std::filesystem::create_directory(INITIAL_PATH);
 
 	const size_t initialSize{ history.size() };
 	for (size_t i{ 0 }; i < initialSize; ++i)
@@ -103,7 +103,7 @@ void Filer::write(std::vector<PlayState> history)
 		PlayState current{ history.back() };
 
 		std::ofstream file;
-		file.exceptions(std::ofstream::badbit);
+		file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
 
 		file.open(filename);
 		file << current.getId() << std::endl;
