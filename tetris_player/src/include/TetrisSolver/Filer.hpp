@@ -44,7 +44,7 @@ GameState Filer::read(std::ifstream& file)
 	u_int64_t id{ 0 };
 	file >> id;
 
-	int depth{ 0 };
+	size_t depth{ 0 };
 	file >> depth;
 
 	size_t rows{ 0 };
@@ -55,7 +55,7 @@ GameState Filer::read(std::ifstream& file)
 
 	if (rows < 4 || cols < 4)
 	{
-		throw std::invalid_argument{ "Dimensions too small." };
+		throw std::out_of_range{ "Input dimensions too small." };
 	}
 
 	Matrix playArea{ rows, cols };
@@ -71,7 +71,7 @@ GameState Filer::read(std::ifstream& file)
 	/* DEPTH MUST BE SMALLER THAN SIZE OF NEXT TETRIMINOS */
 	if (depth >= nextTetriminosSize)
 	{
-		throw std::invalid_argument("Depth too high for tetriminos.");
+		throw std::out_of_range("Input depth too high for tetriminos.");
 	}
 
 	std::vector<Tetrimino::Figure> nextTetriminos;
@@ -103,12 +103,9 @@ void Filer::write(std::vector<PlayState> history)
 		PlayState current{ history.back() };
 
 		std::ofstream file;
+		file.exceptions(std::ofstream::badbit);
 
 		file.open(filename);
-		if (file.fail() || file.bad()) {
-			Logger::error(filename + " could not be opened.");
-			throw std::ios_base::failure(strerror(errno));
-		}
 		file << current.getId() << std::endl;
 		file << current.getLastTetrimino() << std::endl;
 		file << current.getLastRotation() << std::endl;

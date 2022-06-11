@@ -23,7 +23,7 @@ public:
 	 * @param nextTetriminos
 	 */
 	GameState(uint64_t id,
-			int depth,
+			size_t depth,
 			Matrix playArea,
 			std::vector<Tetrimino::Figure> nextTetriminos)
 			:
@@ -33,7 +33,7 @@ public:
 	}
 
 	const uint64_t id;
-	const int depth;
+	const size_t depth;
 	Matrix playArea;
 	const std::vector<Tetrimino::Figure> nextTetriminos;
 };

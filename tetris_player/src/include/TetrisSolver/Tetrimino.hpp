@@ -9,10 +9,9 @@
 #include <array>
 #include <stdexcept>
 
-static const int ONE_ROTATION{ 1 };
-static const int TWO_ROTATIONS{ 2 };
-static const int FOUR_ROTATIONS{ 4 };
-static const int INVALID_ROTATIONS{ -1 };
+static const size_t ONE_ROTATION{ 1 };
+static const size_t TWO_ROTATIONS{ 2 };
+static const size_t FOUR_ROTATIONS{ 4 };
 
 class Tetrimino
 {
@@ -35,12 +34,12 @@ public:
 	Tetrimino& operator=(const Tetrimino&) = delete;
 	Tetrimino& operator=(Tetrimino&&) = delete;
 
-	static int getTetriminoRotations(Figure figure);
+	static size_t getTetriminoRotations(Figure figure);
 
 	static const Tetrimino& getTetrimino(size_t rotation, Figure figure);
 
 	static std::vector<size_t> findBounds(size_t h, size_t w,
-			const std::vector<std::string>& value) noexcept;
+			const std::vector<std::string>& value);
 
 	static Figure charToEnum(char c);
 
@@ -99,7 +98,7 @@ const std::array<Tetrimino, FOUR_ROTATIONS> Tetrimino::T{
 		Tetrimino({ 3, 2, 'T', { "07", "77", "07" }})
 };
 
-int Tetrimino::getTetriminoRotations(Tetrimino::Figure figure)
+size_t Tetrimino::getTetriminoRotations(Tetrimino::Figure figure)
 {
 	switch (figure)
 	{
@@ -114,18 +113,17 @@ int Tetrimino::getTetriminoRotations(Tetrimino::Figure figure)
 	case Figure::O:
 		return ONE_ROTATION;
 	default:
-		return INVALID_ROTATIONS;
+		throw std::invalid_argument("Tetrimino figure does not exist.");
 	}
 }
 
 const Tetrimino& Tetrimino::getTetrimino(size_t rotation,
 		Tetrimino::Figure figure)
 {
-	int maxRotations = getTetriminoRotations(figure);
-
-	if (rotation >= maxRotations)
+	if (getTetriminoRotations(figure) <= rotation)
 	{
-		throw std::invalid_argument("rotation");
+		throw std::out_of_range("Rotation is out of range for figure:" +
+				std::to_string(rotation));
 	}
 
 	switch (figure)
@@ -145,12 +143,12 @@ const Tetrimino& Tetrimino::getTetrimino(size_t rotation,
 	case Figure::O:
 		return O[rotation];
 	default:
-		throw std::invalid_argument("figure");
+		throw std::invalid_argument("Figure does not have rotations assigned.");
 	}
 }
 
 std::vector<size_t> Tetrimino::findBounds(size_t h, size_t w,
-		const std::vector<std::string>& value) noexcept
+		const std::vector<std::string>& value)
 {
 	std::vector<size_t> bounds(w);
 
@@ -187,6 +185,8 @@ Tetrimino::Figure Tetrimino::charToEnum(char c)
 	case 'O':
 		return Figure::O;
 	default:
-		throw std::invalid_argument("character");
+		std::string message{ "Character does not have figure assigned:" };
+		message.push_back(c);
+		throw std::invalid_argument(message);
 	}
 }
