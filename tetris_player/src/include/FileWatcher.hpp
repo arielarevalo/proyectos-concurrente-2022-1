@@ -50,23 +50,23 @@ __attribute__((noreturn)) void FileWatcher::start()
 		int fd{ inotify_init() };
 		if (fd < 0)
 		{
-			Logger::error(std::strerror(errno));
-			throw std::ios_base::failure("Inotify could not create instance.");
+			throw std::ios::failure("Inotify could not create instance: " +
+					std::string(std::strerror(errno)));
 		}
 
 		int wd{ inotify_add_watch(fd, "./put/", IN_CREATE | IN_MODIFY) };
 		if (wd < 0)
 		{
-			Logger::error(std::strerror(errno));
-			throw std::ios_base::failure("Inotify could not add watch.");
+			throw std::ios::failure("Inotify could not add watch:" +
+					std::string(std::strerror(errno)));
 		}
 
 		char buffer[BUF_LEN];
 		ssize_t length{ read(fd, buffer, BUF_LEN) };
 		if (length < 0)
 		{
-			Logger::error(std::strerror(errno));
-			throw std::ios_base::failure("Could not read Inotify instance.");
+			throw std::ios::failure("Could not read Inotify instance:" +
+					std::string(std::strerror(errno)));
 		}
 
 		ssize_t i{ 0 };
@@ -82,7 +82,17 @@ __attribute__((noreturn)) void FileWatcher::start()
 				Logger::setStart();
 				Logger::info("Successfully found tetris game state file.");
 				std::ifstream file{ targetPath };
-				TetrisSolverSerial::play(file);
+				file.exceptions(std::ifstream::badbit);
+				try
+				{
+					TetrisSolverSerial::play(file);
+				}
+				catch (const std::exception& e)
+				{
+					std::throw_with_nested(
+							std::runtime_error("Tetris Solver has crashed.")
+					);
+				}
 			}
 
 			i += EVENT_SIZE + event->len;
