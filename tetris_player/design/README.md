@@ -128,4 +128,6 @@ profundidad de búsqueda.
 
 ### Diagrama
 
-![Diagrama a nivel de main](diagram.svg)
+![Diagrama a nivel de main](UMLClass.PNG)
+
+![Flow Chart a nivel de main](Flowchart.PNG)
