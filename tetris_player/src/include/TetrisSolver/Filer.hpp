@@ -13,6 +13,9 @@
 #include "./Logger.hpp"
 #include "./PlayState.hpp"
 
+/**
+ * @details Filer Class
+ */
 class Filer
 {
 public:
@@ -39,6 +42,12 @@ private:
 
 const char Filer::initialPath[7]{ "./put/" };
 
+/**
+ * @brief Reads a specification file into an in_state.
+ * @details Builds an in_state structure at a given location from the contents of a file at a given location
+ * @param input Pointer to a file to read from
+ * @return
+ */
 GameState Filer::read(std::ifstream& file)
 {
 	u_int64_t id{ 0 };
@@ -88,6 +97,13 @@ GameState Filer::read(std::ifstream& file)
 	return { id, depth, playArea, nextTetriminos };
 }
 
+/**
+ * @brief Writes all play_states into specification output files.
+ * @details Builds files at a preset location based on the series of play_state memory locations passed to it
+ * @param history Array of pointers to direct descendants of a given play_state
+ * @param size Size of the array of pointers
+ * @return 1 if successful, 0 if unsuccessful
+ */
 void Filer::write(std::vector<PlayState> history)
 {
 	std::filesystem::remove_all(initialPath);

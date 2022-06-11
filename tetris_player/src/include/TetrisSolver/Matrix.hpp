@@ -46,6 +46,10 @@ private:
 	std::vector<std::string> value;
 };
 
+/**
+ * @brief Prints the contents of specified matrix to console.
+ * @param matrix Pointer to the matrix to print
+ */
 void Matrix::print() const
 {
 	for (const std::string& s : value) {
@@ -53,6 +57,11 @@ void Matrix::print() const
 	}
 }
 
+/**
+ * @brief Prints the contents of specified matrix to a file.
+ * @param fptr Pointer to the file to print to
+ * @param matrix Pointer to the matrix to print
+ */
 void Matrix::print(std::ofstream& file) const
 {
 	file << rows << std::endl;

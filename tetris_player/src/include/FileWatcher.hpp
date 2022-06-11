@@ -17,11 +17,26 @@
 
 using inotify_event = struct inotify_event;
 
+/**
+ * @details FileWatcher Class
+ */
 class FileWatcher
 {
 public:
+	/**
+	 * @brief file watcher to read input files from put folder.
+	 * @details file watcher to read the input files based on the inotify
+	 * documentation, continuously watch a specific folder and each time an input
+	 * file with the name "tetris_state.txt" appears in that folder processes it
+	 *
+	 */
 	static void start();
 private:
+	/**
+	 * @brief control + C calls this method to finalize the progress.
+	 * @details Method to finalize the File Watcher.
+	 *
+	 */
 	static void finalize(int sig);
 
 	static const ssize_t EVENT_SIZE;
@@ -37,6 +52,13 @@ const char FileWatcher::initialPath[7]{ "./put/" };
 const char FileWatcher::target[17]{ "tetris_state.txt" };
 const char FileWatcher::targetPath[23]{ "./put/tetris_state.txt" };
 
+/**
+ * @brief file watcher to read input files from put folder.
+ * @details file watcher to read the input files based on the inotify
+ * documentation, continuously watch a specific folder and each time an input
+ * file with the name "tetris_state.txt" appears in that folder processes it
+ *
+ */
 __attribute__((noreturn)) void FileWatcher::start()
 {
 	std::signal(SIGINT, finalize);
@@ -93,6 +115,11 @@ __attribute__((noreturn)) void FileWatcher::start()
 	}
 }
 
+/**
+ * @brief control + C calls this method to finalize the progress.
+ * @details Method to finalize the File Watcher.
+ *
+ */
 __attribute__((noreturn)) void FileWatcher::finalize(int sig)
 {
 	Logger::info("Received abort signal. Finalizing.");

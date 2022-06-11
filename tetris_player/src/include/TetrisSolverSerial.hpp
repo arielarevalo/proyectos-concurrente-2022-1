@@ -10,11 +10,28 @@
 #include "TetrisSolver/GameState.hpp"
 #include "TetrisSolver/Solver.hpp"
 
+/**
+ * @details TetrisSolverSerial Class
+ */
 class TetrisSolverSerial {
 public:
+	/**
+	 * @brief Method responsible for encapsulating the main logic of the system.
+ 	 * @details The following actions are executed: read the file, Process file content,
+	 * algorithm to determine the optimal move, generate the output file(s)
+	 * @param file: ifstream, a valid tetris_state.txt file
+	 * 
+	 */
     static void play(std::ifstream& file);
 };
 
+/**
+ * @brief Method responsible for encapsulating the main logic of the system.
+ * @details The following actions are executed: read the file, Process file content,
+ * algorithm to determine the optimal move, generate the output file(s)
+ * @param file: ifstream, a valid tetris_state.txt file
+ * 
+ */
 void TetrisSolverSerial::play(std::ifstream& file)
 {
 	try

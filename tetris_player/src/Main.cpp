@@ -2,6 +2,10 @@
 
 #include "./include/FileWatcher.hpp"
 
+/**
+ * @brief system main method.
+ *
+ */
 int main(int argc, char *argv[])
 {
 	FileWatcher::start();

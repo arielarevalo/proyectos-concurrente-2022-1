@@ -9,10 +9,12 @@
 #include "./PlayState.hpp"
 #include "./Logger.hpp"
 
+/**
+ * @details Solver Class
+ */
 class Solver
 {
 public:
-
 	/**
 	 * @brief Determines the top scoring moves for the current play state.
 	 * @details Navigates a tree of all possible states to find the series of moves
@@ -32,12 +34,24 @@ private:
 
 	bool findChildren(const PlayState& parent, int parentDepth);
 
+	/**
+	 * @brief Get the score of the current game state and make the comparison with a previous game state
+	 * @details Get the score of the current game state and make the comparison with a previous game state
+	 * if the current game state is higher it replaces the previous game state in the high score history
+	 * @param current: PlayState
+	 * @return bool
+	 */
 	bool compareToBest(const PlayState& current);
 
 	GameState gameState;
 	std::vector<PlayState> history{};
 };
 
+/**
+ * @brief Determines the top scoring moves for the current play state.
+ * @details Navigates a tree of all possible states to find the series of moves
+ * that achieve the highest score possible.
+ */
 std::vector<PlayState>& Solver::getBestMoves()
 {
 	PlayState initial{ gameState };
@@ -49,6 +63,14 @@ std::vector<PlayState>& Solver::getBestMoves()
 	}
 }
 
+/**
+ * @brief Recursive method that performs a deep search based on depth in of the best moves
+ * @details Recursive method that performs a deep search based on depth in of the best moves
+ * the best scores are stored in an array of the history of the best plays
+ * @param current: PlayState
+ * @param currentDepth: int
+ * @return isHighScore: bool
+ */
 bool Solver::findBestMoves(const PlayState& current, int currentDepth)
 {
 	int finalDepth{ gameState.depth };
@@ -69,6 +91,14 @@ bool Solver::findBestMoves(const PlayState& current, int currentDepth)
 	return isHighScore;
 }
 
+/**
+ * @brief Recursive method that performs a deep search in search of the best score
+ * @details Recursive method that performs a deep search in search of the best score
+ * makes an attempt to place the piece with its rotations based on a game board and its children
+ * @param parent: PlayState
+ * @param parentDepth: int
+ * @return isHighScore: bool
+ */
 bool Solver::findChildren(const PlayState& parent, int parentDepth)
 {
 	bool isHighScore{ false };
@@ -98,6 +128,13 @@ bool Solver::findChildren(const PlayState& parent, int parentDepth)
 	return isHighScore;
 }
 
+/**
+ * @brief Get the score of the current game state and make the comparison with a previous game state
+ * @details Get the score of the current game state and make the comparison with a previous game state
+ * if the current game state is higher it replaces the previous game state in the high score history
+ * @param current: PlayState
+ * @return isHighScore: bool
+ */
 bool Solver::compareToBest(const PlayState& current)
 {
 	bool isHighScore{ false };

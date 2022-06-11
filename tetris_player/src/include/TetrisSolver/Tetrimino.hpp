@@ -14,6 +14,9 @@ static const int TWO_ROTATIONS{ 2 };
 static const int FOUR_ROTATIONS{ 4 };
 static const int INVALID_ROTATIONS{ -1 };
 
+/**
+ * @details Tetrimino Class
+ */
 class Tetrimino
 {
 public:
@@ -35,13 +38,44 @@ public:
 	Tetrimino& operator=(const Tetrimino&) = delete;
 	Tetrimino& operator=(Tetrimino&&) = delete;
 
+	/**
+	 * @brief Gets the number of possible rotations for a given Tetrimino figure.
+	 * @details Given a Tetrimino figure it returns the number of possible rotations depending on the shape
+	 * @param figure Character symbol representing a Tetrimino figure. Accepted symbols: 'I', 'Z', 'S', 'L', 'J', 'O', 'T'
+	 * @return Integer value representing the number of rotations (1, 2 or 4). If figure is not valid it returns -1.
+	 *
+	 */
 	static int getTetriminoRotations(Figure figure);
 
+	/**
+	 * @brief Gets a Tetrimino for the given symbol and number of rotations.
+	 * @details Returns a Tetrimino representing the given symbol figure rotated clockwise based on the given num_rotations
+	 * @param figure Character symbol representing a tetris figure. Accepted symbols: 'I', 'Z', 'S', 'L', 'J', 'O', 'T'
+	 * @param num_rotations Number of rotations (clockwise) to apply to the figure. Accepted values: 1, 2, 4
+	 * @return Tetrimino. If figure symbol is not valid or num_rotations is not valid for the given figure, it returns NULL
+	 *
+	 */
 	static const Tetrimino& getTetrimino(size_t rotation, Figure figure);
 
+	/**
+	 * @brief Gets a Tetrimino bounds.
+	 * @details Determine the tetrimino dimensions
+	 * @param h = height: size_t
+	 * @param w = width: size_t
+	 * @param tetriminio values: vector<string> 
+	 * @return vector<size_t> findBounds
+	 *
+	 */
 	static std::vector<size_t> findBounds(size_t h, size_t w,
 			const std::vector<std::string>& value) noexcept;
 
+	/**
+	 * @brief Gets the figure enum.
+	 * @details Return a figure enumeration from a character c
+	 * @param figure Character symbol representing a tetris figure. Accepted symbols: 'I', 'Z', 'S', 'L', 'J', 'O', 'T'
+	 * @return Figure enum
+	 *
+	 */
 	static Figure charToEnum(char c);
 
 	const size_t height{ 0 };
@@ -99,6 +133,13 @@ const std::array<Tetrimino, FOUR_ROTATIONS> Tetrimino::T{
 		Tetrimino({ 3, 2, 'T', { "07", "77", "07" }})
 };
 
+/**
+ * @brief Gets the number of possible rotations for a given Tetrimino figure.
+ * @details Given a Tetrimino figure it returns the number of possible rotations depending on the shape
+ * @param figure Character symbol representing a Tetrimino figure. Accepted symbols: 'I', 'Z', 'S', 'L', 'J', 'O', 'T'
+ * @return Integer value representing the number of rotations (1, 2 or 4). If figure is not valid it returns -1.
+ *
+ */
 int Tetrimino::getTetriminoRotations(Tetrimino::Figure figure)
 {
 	switch (figure)
@@ -118,6 +159,14 @@ int Tetrimino::getTetriminoRotations(Tetrimino::Figure figure)
 	}
 }
 
+/**
+ * @brief Gets a Tetrimino for the given symbol and number of rotations.
+ * @details Returns a Tetrimino representing the given symbol figure rotated clockwise based on the given num_rotations
+ * @param figure Character symbol representing a tetris figure. Accepted symbols: 'I', 'Z', 'S', 'L', 'J', 'O', 'T'
+ * @param num_rotations Number of rotations (clockwise) to apply to the figure. Accepted values: 1, 2, 4
+ * @return Tetrimino. If figure symbol is not valid or num_rotations is not valid for the given figure, it returns NULL
+ *
+ */
 const Tetrimino& Tetrimino::getTetrimino(size_t rotation,
 		Tetrimino::Figure figure)
 {
@@ -149,6 +198,15 @@ const Tetrimino& Tetrimino::getTetrimino(size_t rotation,
 	}
 }
 
+/**
+ * @brief Gets a Tetrimino bounds.
+ * @details Determine the tetrimino dimensions
+ * @param h = height: size_t
+ * @param w = width: size_t
+ * @param tetriminio values: vector<string>
+ * @return vector<size_t> findBounds
+ *
+ */
 std::vector<size_t> Tetrimino::findBounds(size_t h, size_t w,
 		const std::vector<std::string>& value) noexcept
 {
@@ -168,6 +226,13 @@ std::vector<size_t> Tetrimino::findBounds(size_t h, size_t w,
 	return bounds;
 }
 
+/**
+ * @brief Gets the figure enum.
+ * @details Return a figure enumeration from a character c
+ * @param figure Character symbol representing a tetris figure. Accepted symbols: 'I', 'Z', 'S', 'L', 'J', 'O', 'T'
+ * @return Figure enum
+ *
+ */
 Tetrimino::Figure Tetrimino::charToEnum(char c)
 {
 	switch (c)
