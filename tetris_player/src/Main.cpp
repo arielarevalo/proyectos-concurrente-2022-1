@@ -2,7 +2,7 @@
 
 #include "./include/FileWatcher.hpp"
 
-int main(int argc, char* argv[])
+int main()
 {
 	try
 	{
@@ -11,9 +11,6 @@ int main(int argc, char* argv[])
 	catch (const std::exception& e)
 	{
 		Logger::error("FailWatcher has crashed.", e);
-	}
-	catch (...) {
-		Logger::error("Non-Exception thrown.");
 	}
 	exit(1);
 }

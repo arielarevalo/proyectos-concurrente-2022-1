@@ -102,15 +102,13 @@ void Filer::write(std::vector<PlayState> history)
 
 		PlayState current{ history.back() };
 
-		std::ofstream file;
+		std::ofstream file{filename};
 		file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
 
-		file.open(filename);
 		file << current.getId() << std::endl;
 		file << current.getLastTetrimino() << std::endl;
 		file << current.getLastRotation() << std::endl;
 		current.getPlayArea().print(file);
-		file.close();
 
 		history.pop_back();
 	}
