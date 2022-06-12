@@ -42,9 +42,12 @@ std::vector<PlayState>& Solver::getBestMoves()
 {
 	PlayState initial{ gameState };
 	findBestMoves(initial, INITIAL_DEPTH);
-	if (!history.empty()) {
+	if (!history.empty())
+	{
 		return history;
-	} else {
+	}
+	else
+	{
 		throw std::domain_error("No valid moves down to requested depth.");
 	}
 }
@@ -52,7 +55,7 @@ std::vector<PlayState>& Solver::getBestMoves()
 bool Solver::findBestMoves(const PlayState& current, int currentDepth)
 {
 	int finalDepth{ static_cast<int>(gameState.depth) };
-	bool isHighScore{false};
+	bool isHighScore{ false };
 
 	if (currentDepth < finalDepth)
 	{

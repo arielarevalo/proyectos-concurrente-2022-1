@@ -62,13 +62,9 @@ void Logger::print_exception(const std::exception& e, int level)
 	{
 		std::rethrow_if_nested(e);
 	}
-	catch (const std::exception& nestedException)
+	catch (const std::exception& ne)
 	{
-		print_exception(nestedException, level + 1);
-	}
-	catch (...)
-	{
-		std::cerr << "Non-Exception thrown nested." << std::endl;
+		print_exception(ne, level + 1);
 	}
 }
 
@@ -76,8 +72,8 @@ std::string Logger::deduce_exception_what(const std::exception& e)
 {
 	try {
 		std::rethrow_if_nested(e);
-	} catch(const std::exception& n) {
-		return deduce_exception_what(n);
+	} catch(const std::exception& ne) {
+		return deduce_exception_what(ne);
 	}
 	return e.what();
 }

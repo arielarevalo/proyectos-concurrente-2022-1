@@ -34,7 +34,7 @@ public:
 	 * @param column Column of the play_area at which to attempt to add the tetrimino
 	 * @return Whether place was successful
 	 */
-	bool place(Tetrimino::Figure figure, int rotation, size_t column);
+	bool place(Tetrimino::Figure figure, size_t rotation, size_t column);
 
 	unsigned int score() const;
 
@@ -56,9 +56,9 @@ private:
 	Matrix playArea;
 };
 
-bool PlayState::place(Tetrimino::Figure figure, int rotation, size_t column)
+bool PlayState::place(Tetrimino::Figure figure, size_t rotation, size_t column)
 {
-	const Tetrimino& tetrimino{Tetrimino::getTetrimino(rotation, figure)};
+	const Tetrimino& tetrimino{ Tetrimino::getTetrimino(rotation, figure) };
 
 	if (tetrimino.width > playArea.cols - column)
 	{
@@ -121,16 +121,20 @@ bool PlayState::place(Tetrimino::Figure figure, int rotation, size_t column)
 
 unsigned int PlayState::score() const
 {
-	unsigned int score{0};
+	unsigned int score{ 0 };
 
-	for (size_t i{0}; i < playArea.rows; ++i) {
-		unsigned int sum{0};
-		for (size_t j{0}; j < playArea.cols; ++j) {
-			if (playArea[i][j] != '0') {
+	for (size_t i{ 0 }; i < playArea.rows; ++i)
+	{
+		unsigned int sum{ 0 };
+		for (size_t j{ 0 }; j < playArea.cols; ++j)
+		{
+			if (playArea[i][j] != '0')
+			{
 				++sum;
 			}
 		}
-		if (sum > 0) {
+		if (sum > 0)
+		{
 			score += sum * i * i;
 		}
 	}
