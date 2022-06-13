@@ -107,6 +107,6 @@ El programa seguirá corriendo hasta recibir una señal de interrupción
 ## Créditos
 
 El programa fue desarrollado en su totalidad por Ariel Arévalo Alvarado
-<ariel.arevalo@ucr.ac.cr> y Pablo Madrigal
-Ramírez <pablo.madrigalramirez@ucr.ac.cr>
+(<ariel.arevalo@ucr.ac.cr>) y Pablo Madrigal
+Ramírez (<pablo.madrigalramirez@ucr.ac.cr>)
 
