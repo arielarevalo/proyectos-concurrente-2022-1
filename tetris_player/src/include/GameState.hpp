@@ -10,17 +10,17 @@
 #include "./Tetrimino.hpp"
 
 /**
- * The set of initial game state information.
+ * @brief The set of initial game state information.
  */
 class GameState
 {
 public:
 	/**
-	 *
-	 * @param id
-	 * @param depth
-	 * @param playArea
-	 * @param nextTetriminos
+	 * Constructs a game state from its required fields.
+	 * @param id Identifier of the game state.
+	 * @param depth Depth to solve this game state for.
+	 * @param playArea Initial play area of the game state.
+	 * @param nextTetriminos List of next tetriminos to place.
 	 */
 	GameState(uint64_t id,
 			size_t depth,
@@ -34,6 +34,6 @@ public:
 
 	const uint64_t id;
 	const size_t depth;
-	Matrix playArea;
+	const Matrix playArea;
 	const std::vector<Tetrimino::Figure> nextTetriminos;
 };

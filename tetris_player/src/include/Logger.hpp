@@ -8,66 +8,71 @@
 #include <string>
 
 /**
- * @details Error handler Class
+ * @brief Logs info and error messages, and unwinds nested exceptions.
  */
 class Logger
 {
 public:
 	/**
-	 * @brief INFO message handler type.
- 	 * @details Handling the info messages of the application
-	 * @param message: string
+	 * @brief Logs info messages with timestamp.
+	 * @param message Message to log.
 	 */
 	static void info(const std::string& message);
 
 	/**
-	 * @brief ERROR message handler type.
- 	 * @details Handling the error messages of the application
-	 * @param message: string
+	 * @brief Logs error messages with timestamp.
+	 * @param message Message to log.
 	 */
 	static void error(const std::string& message);
 
+	/**
+	 * @brief Logs error messages with timestamp and exception unwinding.
+	 * @param message Message to log.
+	 * @param e Exception to unwind.
+	 */
+	static void error(const std::string& message, const std::exception& e);
+
+	/**
+	 * @brief Unwinds a nested exception to return the descriptive message of
+	 * the bottom level exception.
+	 * @param e Exception to unwind and deduce.
+	 * @return Descriptive message of bottom level exception.
+	 */
+	static std::string deduce_exception_what(const std::exception& e);
+
+	/**
+ 	 * @brief Sets internal timer to zero.
+	 */
+	static void setStart();
+
+private:
 	/**
 	 * @brief Determines the time it takes to process each method or action.
  	 * @details Method that records the processing time
 	 * @return u_int64_t value
 	 */
-	static void error(const std::string& message, const std::exception& e);
-
-	static std::string deduce_exception_what(const std::exception& e);
-
-	/**
- 	 * @details start the timer
-	 */
-	static void setStart();
-private:
-	static std::chrono::high_resolution_clock::time_point start;
-
 	static u_int64_t duration();
 
+	/**
+	 * @brief Unwinds exception and prints each level.
+	 * @param e Exception to unwind.
+	 * @param level Current unwind depth level.
+	 */
 	static void print_exception(const std::exception& e, int level = 0);
+
+	static std::chrono::high_resolution_clock::time_point start;
 };
 
 std::chrono::high_resolution_clock::time_point Logger::start{
 		std::chrono::high_resolution_clock::now()
 };
 
-/**
- * @brief INFO message handler type.
- * @details Handling the info messages of the application
- * @param message: string
- */
 void Logger::info(const std::string& message)
 {
 	std::cout << "[" << duration() << " ms]" << "[INFO]: "
 			  << message << std::endl;
 }
 
-/**
- * @brief ERROR message handler type.
- * @details Handling the error messages of the application
- * @param message: string
- */
 void Logger::error(const std::string& message)
 {
 	std::cerr << "[" << duration() << " ms]" << "[ERROR]: "
@@ -80,12 +85,6 @@ void Logger::error(const std::string& message, const std::exception& e)
 	print_exception(e);
 }
 
-
-/**
- * @brief Determines the time it takes to process each method or action.
- * @details Method that records the processing time
- * @return u_int64_t value
- */
 u_int64_t Logger::duration()
 {
 	return std::chrono::duration_cast<std::chrono::milliseconds>
@@ -107,17 +106,17 @@ void Logger::print_exception(const std::exception& e, int level)
 
 std::string Logger::deduce_exception_what(const std::exception& e)
 {
-	try {
+	try
+	{
 		std::rethrow_if_nested(e);
-	} catch(const std::exception& ne) {
+	}
+	catch (const std::exception& ne)
+	{
 		return deduce_exception_what(ne);
 	}
 	return e.what();
 }
 
-/**
- * @details start the timer
- */
 void Logger::setStart()
 {
 	start = std::chrono::high_resolution_clock::now();

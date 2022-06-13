@@ -3,8 +3,7 @@
 #include "./include/FileWatcher.hpp"
 
 /**
- * @brief system main method.
- *
+ * @brief Entry point.
  */
 int main()
 {
