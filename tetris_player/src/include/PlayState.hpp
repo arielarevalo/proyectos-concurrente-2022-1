@@ -9,15 +9,14 @@
 #include "./Tetrimino.hpp"
 
 /**
- * A single state of a game of Tetris.
+ * @brief A single state of a play of Tetris.
  */
 class PlayState
 {
 public:
 	/**
-	 * @brief Creates a new play_state structure.
-	 * @details Allocates memory for a new play_state struct, builds it, and returns its location
-	 * @return Pointer to location of newly created play_state struct
+	 * Constructs a play state from a given game state.
+	 * @param gameState Game state to construct a play state from.
 	 */
 	explicit PlayState(const GameState& gameState)
 			:id(gameState.id),
@@ -26,33 +25,35 @@ public:
 	}
 
 	/**
-	 * @brief Attempts to add a new tetrimino to the passed play_state.
-	 * @details Attempts to add a new tetrimino to the play_area of the passed play_state at the given column
-	 * @param play_state Pointer to play_state to update
-	 * @param tetrimino Tetrimino to add to the play_state
-	 * @param rotation Rotation of tetrimino to add
-	 * @param column Column of the play_area at which to attempt to add the tetrimino
-	 * @return Whether place was successful
+	 * @brief Attempts to place a new Tetrimino at a given column.
+	 * @param figure Tetrimino::Figure to place.
+	 * @param rotation Rotation number of the figure to place.
+	 * @param column Column to attempt to place to.
+	 * @return Whether place was successful.
 	 */
 	bool place(Tetrimino::Figure figure, size_t rotation, size_t column);
 
+	/**
+	 * @brief Scores play area based on its layout.
+	 * @return Score of play area.
+	 */
 	unsigned int score() const;
 
 	uint64_t getId() const;
 
 	char getLastTetrimino() const;
 
-	int getLastRotation() const;
+	size_t getLastRotation() const;
 
 	const Matrix& getPlayArea() const;
 
 private:
-	static const char INITIAL_TETRIMINO = static_cast<char>(32);  // Whitespace
-	static const int INITIAL_ROTATION = -1;  // Invalid
+	static const char INITIAL_TETRIMINO{ static_cast<char>(32) };  // Whitespace
+	static const size_t INITIAL_ROTATION{ 0 };
 
 	const uint64_t id;
 	char lastTetrimino{ INITIAL_TETRIMINO };
-	int lastRotation{ INITIAL_ROTATION };
+	size_t lastRotation{ INITIAL_ROTATION };
 	Matrix playArea;
 };
 
@@ -146,14 +147,17 @@ uint64_t PlayState::getId() const
 {
 	return id;
 }
+
 char PlayState::getLastTetrimino() const
 {
 	return lastTetrimino;
 }
-int PlayState::getLastRotation() const
+
+size_t PlayState::getLastRotation() const
 {
 	return lastRotation;
 }
+
 const Matrix& PlayState::getPlayArea() const
 {
 	return playArea;

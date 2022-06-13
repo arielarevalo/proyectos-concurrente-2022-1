@@ -9,35 +9,42 @@
 #include <vector>
 
 /**
- * A matrix of characters.
+ * @brief A matrix of characters.
  */
 class Matrix {
 public:
 	/**
-	 * @brief Creates a matrix of characters of the specified dimensions.
-	 * @param rows Number of rows to make the matrix
-	 * @param cols Number of columns to make the matrix
-	 * @return A pointer to a newly created matrix
+	 * @brief Constructs a matrix of characters of the specified dimensions.
+	 * @param rows Number of rows.
+	 * @param cols Number of columns.
 	 */
 	Matrix(size_t rows, size_t cols)
 			:rows(rows), cols(cols),
 			 value(std::vector<std::string>(rows, std::string(cols, '0'))) { }
 
 	/**
-	 * @brief Prints the contents of specified matrix to console.
-	 * @param matrix Pointer to the matrix to print
+	 * @brief Prints the matrix contents to console.
 	 */
 	void print() const;
 
 	/**
-	 * @brief Prints the contents of specified matrix to a file.
-	 * @param fptr Pointer to the file to print to
-	 * @param matrix Pointer to the matrix to print
+	 * @brief Prints the matrix contents to a file.
+	 * @param file File to print to.
 	 */
 	void print(std::ofstream& file) const;
 
+	/**
+	 * @brief Gets matrix row at passed value.
+	 * @param i Row to get.
+	 * @return Row of character matrix.
+	 */
 	std::string& operator[](size_t i);
 
+	/**
+	 * @brief Gets constant matrix row at passed value.
+	 * @param i Row to get.
+	 * @return Constant row of character matrix.
+	 */
 	const std::string& operator[](size_t i) const;
 
 	const size_t rows;

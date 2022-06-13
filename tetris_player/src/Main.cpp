@@ -2,6 +2,9 @@
 
 #include "./include/FileWatcher.hpp"
 
+/**
+ * @brief Entry point.
+ */
 int main()
 {
 	try

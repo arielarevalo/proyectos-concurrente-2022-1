@@ -13,31 +13,29 @@
 #include "./Logger.hpp"
 #include "./PlayState.hpp"
 
+/**
+ * @brief Reads input file to game state and writes to output file with
+ * history of best play state.
+ */
 class Filer
 {
 public:
 	/**
-	 * @brief Reads a specification file into an in_state.
-	 * @details Builds an in_state structure at a given location from the contents of a file at a given location
-	 * @param input Pointer to a file to read from
-	 * @return
+	 * @brief Reads input file into a new game state.
+	 * @param file File to read from.
+	 * @return New game state.
 	 */
 	static GameState read(std::ifstream& file);
 
 	/**
-	 * @brief Writes all play_states into specification output files.
-	 * @details Builds files at a preset location based on the series of play_state memory locations passed to it
-	 * @param history Array of pointers to direct descendants of a given play_state
-	 * @param size Size of the array of pointers
-	 * @return 1 if successful, 0 if unsuccessful
+	 * @brief Writes history of best play states into output files.
+	 * @param history List of ancestors of best play state.
 	 */
 	static void write(std::vector<PlayState> history);
 
 private:
-	static const char INITIAL_PATH[7];
+	static constexpr char INITIAL_PATH[7]{ "./put/" };
 };
-
-const char Filer::INITIAL_PATH[7]{ "./put/" };
 
 GameState Filer::read(std::ifstream& file)
 {

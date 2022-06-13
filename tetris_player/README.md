@@ -1,9 +1,5 @@
 # Tetris Solver
 
-    Los miembros del equipo elaboran el documento de análisis en un README.md, en el cual debe quedar claro a un lector ajeno al proyecto, el problema que se resuelve, y quienes son los integrantes del equipo. Proveer además un manual de uso, que incluye cómo compilar el programa y cómo correrlo (por ejemplo, explicar los argumentos en línea de comandos que recibe) y cómo detenerlo (tanto con Ctrl+C como el comando kill).
-    El documento puede incluir también capturas de pantallas o videos de la ejecución, ya sea en la terminal o utilizando la interfaz gráfica dada por el profesor (ver sección de pruebas).
-    En el documento de análisis para el proyecto, agregue una sección de diseño y un enlace el documento de diseño. Esto permitirá la navegabilidad desde la raíz del repositorio al proyecto 01, y de éste hacia su diseño.
-
 Este proyecto consiste en un programa capaz de resolver una jugada de
 Tetris, con el problema enunciado de la siguiente forma:
 
@@ -16,7 +12,7 @@ O dicho de otra forma, el programa recibe un archivo con un estado de juego
 inicial, lo cual consiste en un número de identificación, una cantidad de
 próximas piezas por las cuales consultar, las dimensiones y la matriz que
 representan el área de juego, y una serie de piezas siguientes las cuales
-intentar agregar al área de juego. El programa prueba todas las formas en
+intentar agregar al área de juego. El programa prueba todas las maneras en
 que estas piezas se pueden agregar al área de juego, en el orden en que se
 escriben en el archivo, y devuelve una serie de archivos que detallan los
 movimientos que dan la mayor cantidad de puntos.
@@ -28,6 +24,8 @@ Además de la descripción anterior, mostramos un ejemplo de un archivo de
 entrada seguidamente:
 
 ```
+tetris_state.txt
+
 1650259796944
 1
 20
@@ -62,13 +60,14 @@ L
 S
 ```
 
-Con un archivo de entrada `archivo.txt` procedemos a compilar el programa con el
-comando `make`, y podemos correrlo para nuestro archivo ejecutando
-`./bin/tetris_solver_serial [Path]/archivo.txt`. Cabe destacar que el programa
-solamente se puede correr con un archivo. Seguidamente, se estarán
-almacenando en el directorio `output` los archivos que representan las
-movidas las cuales hacer para obtener la mayor cantidad de puntos. Como
-ejemplo de archivo de salida, se presenta el siguiente:
+Con un archivo de entrada `tetris_state.txt` a la mano procedemos a compilar el 
+programa con el comando `cmake`, y podemos correrlo ejecutando `.
+/bin/tetris_player`. Una vez que el programa esté corriendo, podemos agregar 
+el archivo de entrada a la carpeta `./bin/put`, donde automáticamente será 
+procesado por el programa. Seguidamente, se estarán almacenando en el 
+directorio `put` los archivos que representan las movidas las cuales hacer 
+para obtener la mayor cantidad de puntos. Como ejemplo de archivo de salida,
+se presenta el siguiente:
 
 ```
 tetris_play_0.txt
@@ -100,8 +99,14 @@ I
 1777742240
 ```
 
+El programa seguirá corriendo hasta recibir una señal de interrupción 
+(SIGINT), la cual se puede emitir haciendo `Ctrl + C` en el teclado.
+
+## [Diseño](./design/README.md)
+
 ## Créditos
 
 El programa fue desarrollado en su totalidad por Ariel Arévalo Alvarado
-<ariel.arevalo@ucr.ac.cr> y Pablo Madrigal Ramírez <pablo.madrigalramirez@ucr.ac.cr>
+<ariel.arevalo@ucr.ac.cr> y Pablo Madrigal
+Ramírez <pablo.madrigalramirez@ucr.ac.cr>
 

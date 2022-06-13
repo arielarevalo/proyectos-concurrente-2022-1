@@ -17,32 +17,62 @@
 
 using inotify_event = struct inotify_event;
 
+/**
+ * @brief Watches a directory and processes required files on event.
+ */
 class FileWatcher
 {
 public:
+	/**
+	 * @brief Starts watching the target directory.
+	 * @details Watches a directory using the inotify library to continuously
+	 * monitor a specific folder and, on given file system events, check
+	 * for target file names and process the files.
+	 */
 	static void start();
-private:
-	static void finalize(int sig);
-	static void processEvents(const std::vector<const inotify_event*>& events);
-	static void processFile(const std::string& path);
-	static void processFileWithRetry(const std::string& path);
 
-	static const ssize_t EVENT_SIZE;
-	static const ssize_t BUF_LEN;
-	static const int MAX_RETRIES;
-	static const char INITIAL_PATH[7];
-	static const char TARGET[17];
-	static const char RETRY_ERROR[33];
+private:
+	/**
+	 * @brief Signal handler that terminates FileWatcher process.
+	 */
+	static void finalize(int sig);
+
+	/**
+	 * @brief Builds a list of event pointers from points in a text buffer
+	 * containing the contents of the events.
+	 * @param eventBuffer Text buffer containing event contents.
+	 * @param length Length of the text buffer.
+	 * @return List of event pointers.
+	 */
 	static const std::vector<const inotify_event*>
 	buildEvents(const char* eventBuffer, ssize_t length);
-};
 
-const ssize_t FileWatcher::EVENT_SIZE{ sizeof(inotify_event) };
-const ssize_t FileWatcher::BUF_LEN{ 1024 * (EVENT_SIZE + 16) };
-const int FileWatcher::MAX_RETRIES{ 5 };
-const char FileWatcher::INITIAL_PATH[7]{ "./put/" };
-const char FileWatcher::TARGET[17]{ "tetris_state.txt" };
-const char FileWatcher::RETRY_ERROR[33]{ "basic_ios::clear: iostream error" };
+	/**
+	 * @brief Checks if passed events include target filename, and processes
+	 * it if found.
+	 * @param events Events to process.
+	 */
+	static void processEvents(const std::vector<const inotify_event*>& events);
+
+	/**
+	 * @brief Opens file at a given path and solves it as a Tetris game state.
+	 * @param path Path to file to solve.
+	 */
+	static void processFile(const std::string& path);
+
+	/**
+	 * @brief Decorates ::processFile with the set number of max retries.
+	 * @param path Path to file to solve.
+	 */
+	static void processFileWithRetry(const std::string& path);
+
+	static const ssize_t EVENT_SIZE{ sizeof(inotify_event) };
+	static const ssize_t BUF_LEN{ 1024 * (EVENT_SIZE + 16) };
+	static const ssize_t MAX_RETRIES{ 5 };
+	static constexpr char INITIAL_PATH[7]{ "./put/" };
+	static constexpr char TARGET[17]{ "tetris_state.txt" };
+	static constexpr char RETRY_ERROR[33]{ "basic_ios::clear: iostream error" };
+};
 
 __attribute__((noreturn)) void FileWatcher::start()
 {
@@ -86,6 +116,7 @@ __attribute__((noreturn)) void FileWatcher::start()
 		(void)close(fd);
 	}
 }
+
 const std::vector<const inotify_event*>
 FileWatcher::buildEvents(const char* eventBuffer, ssize_t length)
 {
@@ -134,7 +165,7 @@ void FileWatcher::processFile(const std::string& path)
 			std::ifstream::badbit | std::ifstream::failbit);
 	try
 	{
-		TetrisSolverSerial::play(file);
+		TetrisSolverSerial::solve(file);
 	}
 	catch (const std::exception& e)
 	{
@@ -152,7 +183,7 @@ void FileWatcher::processFile(const std::string& path)
 
 void FileWatcher::processFileWithRetry(const std::string& path)
 {
-	for (int i{ 0 }; i < MAX_RETRIES; ++i)
+	for (ssize_t i{ 0 }; i < MAX_RETRIES; ++i)
 	{
 		try
 		{

@@ -13,6 +13,11 @@ static const size_t ONE_ROTATION{ 1 };
 static const size_t TWO_ROTATIONS{ 2 };
 static const size_t FOUR_ROTATIONS{ 4 };
 
+/**
+ * @brief Contains shape and dimensions of a single tetrimino.
+ * @details Tetriminoes are immutable. As such, functions are provided to
+ * access static copies of all Tetriminoes.
+ */
 class Tetrimino
 {
 public:
@@ -29,18 +34,58 @@ public:
 	static const std::array<Tetrimino, ONE_ROTATION> O;
 	static const std::array<Tetrimino, FOUR_ROTATIONS> T;
 
+	/**
+	 * Deleted to preserve immutability.
+	 */
 	Tetrimino() = delete;
+
+	/**
+	 * Deleted to preserve immutability.
+	 */
 	Tetrimino(const Tetrimino&) = delete;
+
+	/**
+	 * Deleted to preserve immutability.
+	 */
 	Tetrimino& operator=(const Tetrimino&) = delete;
+
+	/**
+	 * Deleted to preserve immutability.
+	 */
 	Tetrimino& operator=(Tetrimino&&) = delete;
 
+	/**
+	 * @brief Gets the number of possible rotations for a given
+	 * Tetrimino::Figure.
+	 * @param figure Figure representing shape of each possible Tetrimino.
+	 * @return The number of rotations.
+	 */
 	static size_t getTetriminoRotations(Figure figure);
 
+	/**
+	 * @brief Gets a Tetrimino for a given ::Figure and rotations.
+	 * @param figure ::Figure representing shape of each possible Tetrimino.
+	 * @param num_rotations Number of rotations (clockwise) to apply to the
+	 * ::Figure.
+	 * @return Appropriate Tetrimino for ::Figure and rotation.
+	 */
 	static const Tetrimino& getTetrimino(size_t rotation, Figure figure);
 
+	/**
+	 * @brief Gets bounds for a Tetrimino.
+	 * @param h Height of the Tetrimino.
+	 * @param w Width of the Tetrimino.
+	 * @param value Shape of Tetrimino.
+	 * @return Width size list of bounds for given Tetrimino shape.
+	 */
 	static std::vector<size_t> findBounds(size_t h, size_t w,
 			const std::vector<std::string>& value);
 
+	/**
+	 * @brief Gets appropriate ::Figure for a given character.
+	 * @param c Character representing a tetris figure.
+	 * @return Appropriate ::Figure for given character.
+	 */
 	static Figure charToEnum(char c);
 
 	const size_t height{ 0 };
@@ -50,7 +95,18 @@ public:
 	const std::vector<std::string> value;
 
 private:
+	/**
+	 * Constructs a Tetrimino by moving an existing instance.
+	 */
 	Tetrimino(Tetrimino&&) noexcept = default;
+
+	/**
+	 * Constructs a Tetrimino from a full set of fields.
+	 * @param h Height of the Tetrimino.
+	 * @param w Width of the Tetrimino.
+	 * @param c Character representing Tetrimino shape.
+	 * @param value Shape of the Tetrimino.
+	 */
 	Tetrimino(size_t h, size_t w, char c,
 			const std::vector<std::string>& value) noexcept
 			:height(h), width(w), character(c),

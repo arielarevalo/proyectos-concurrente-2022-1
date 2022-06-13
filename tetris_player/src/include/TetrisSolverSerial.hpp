@@ -6,17 +6,27 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "TetrisSolver/Filer.hpp"
-#include "TetrisSolver/GameState.hpp"
-#include "TetrisSolver/Solver.hpp"
+#include "Filer.hpp"
+#include "GameState.hpp"
+#include "Solver.hpp"
 
+/**
+ * @brief Solves a given game state by finding the best moves and outputting
+ * them to files.
+ */
 class TetrisSolverSerial
 {
 public:
-	static bool play(std::ifstream& file);
+	/**
+	 * @brief Finds the game state for a file and solves for the best moves.
+ 	 * @details Reads the file, processes file content, determines the
+ 	 * optimal move, and generates the output files.
+	 * @param file Input game state file.
+	 */
+	static bool solve(std::ifstream& file);
 };
 
-bool TetrisSolverSerial::play(std::ifstream& file)
+bool TetrisSolverSerial::solve(std::ifstream& file)
 {
 	try
 	{
@@ -26,7 +36,7 @@ bool TetrisSolverSerial::play(std::ifstream& file)
 		Logger::setStart();
 
 		Solver solver{ initial };
-		std::vector<PlayState> history{ solver.getBestMoves() };
+		std::vector<PlayState> history{ solver.solveBestMoves() };
 		Logger::info("Successfully found best moves for game state.");
 
 		Filer::write(history);
@@ -56,7 +66,7 @@ bool TetrisSolverSerial::play(std::ifstream& file)
 	{
 		std::throw_with_nested(
 				std::ios::failure("Failed to open/close file: " +
-				std::string(std::strerror(errno)))
+						std::string(std::strerror(errno)))
 		);
 	}
 }

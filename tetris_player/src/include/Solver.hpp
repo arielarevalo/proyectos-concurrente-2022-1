@@ -9,17 +9,23 @@
 #include "./PlayState.hpp"
 #include "./Logger.hpp"
 
+/**
+ * @brief Solves a game state for its best moves.
+ */
 class Solver
 {
 public:
+	/**
+	 * @brief Determines the top scoring moves for the initial game state.
+	 * @details Navigates a procedural tree of all possible states to find the
+	 * series of moves that achieve the highest score possible.
+	 */
+	std::vector<PlayState>& solveBestMoves();
 
 	/**
-	 * @brief Determines the top scoring moves for the current play state.
-	 * @details Navigates a tree of all possible states to find the series of moves
-	 * that achieve the highest score possible.
+	 * Constructs a Solver from a given game state.
+	 * @param gameState Game state of the Solver.
 	 */
-	std::vector<PlayState>& getBestMoves();
-
 	explicit Solver(const GameState& gameState)
 			:gameState(gameState)
 	{
@@ -28,20 +34,42 @@ public:
 private:
 	const int INITIAL_DEPTH{ -1 };
 
+	/**
+	 * @brief Performs a recursive depth first search based on the current
+	 * play state and the current depth.
+	 * @param current Play state currently being solved.
+	 * @param currentDepth Current solution depth.
+	 * @return Whether high score was found for this state.
+	 */
 	bool findBestMoves(const PlayState& current, int currentDepth);
 
+	/**
+	 * @brief Determines children of a given parent play state and calls
+	 * ::findBestMoves on each of them.
+	 * @param parent Parent play state currently being solved.
+	 * @param parentDepth Parent solution depth.
+	 * @return Whether a high score was found in children.
+	 */
 	bool findChildren(const PlayState& parent, int parentDepth);
 
+	/**
+	 * @brief Score the current play state and compare with previous top
+	 * score to replace it if higher.
+	 * @param current Play state being scored.
+	 * @return Whether play state was a high score.
+	 */
 	bool compareToBest(const PlayState& current);
 
 	const GameState& gameState;
 	std::vector<PlayState> history{};
 };
 
-std::vector<PlayState>& Solver::getBestMoves()
+std::vector<PlayState>& Solver::solveBestMoves()
 {
 	PlayState initial{ gameState };
+
 	findBestMoves(initial, INITIAL_DEPTH);
+
 	if (!history.empty())
 	{
 		return history;
