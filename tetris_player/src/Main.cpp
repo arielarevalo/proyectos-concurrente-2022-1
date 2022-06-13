@@ -6,7 +6,15 @@
  * @brief system main method.
  *
  */
-int main(int argc, char *argv[])
+int main()
 {
-	FileWatcher::start();
+	try
+	{
+		FileWatcher::start();
+	}
+	catch (const std::exception& e)
+	{
+		Logger::error("FailWatcher has crashed.", e);
+	}
+	exit(1);
 }

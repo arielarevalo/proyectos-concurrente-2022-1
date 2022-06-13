@@ -37,10 +37,10 @@ public:
 	static void write(std::vector<PlayState> history);
 
 private:
-	static const char initialPath[7];
+	static const char INITIAL_PATH[7];
 };
 
-const char Filer::initialPath[7]{ "./put/" };
+const char Filer::INITIAL_PATH[7]{ "./put/" };
 
 /**
  * @brief Reads a specification file into an in_state.
@@ -53,7 +53,7 @@ GameState Filer::read(std::ifstream& file)
 	u_int64_t id{ 0 };
 	file >> id;
 
-	int depth{ 0 };
+	size_t depth{ 0 };
 	file >> depth;
 
 	size_t rows{ 0 };
@@ -64,7 +64,7 @@ GameState Filer::read(std::ifstream& file)
 
 	if (rows < 4 || cols < 4)
 	{
-		throw std::invalid_argument{ "Dimensions too small." };
+		throw std::out_of_range{ "Input dimensions too small." };
 	}
 
 	Matrix playArea{ rows, cols };
@@ -80,7 +80,7 @@ GameState Filer::read(std::ifstream& file)
 	/* DEPTH MUST BE SMALLER THAN SIZE OF NEXT TETRIMINOS */
 	if (depth >= nextTetriminosSize)
 	{
-		throw std::invalid_argument("Depth too high for tetriminos.");
+		throw std::out_of_range("Input depth too high for tetriminos.");
 	}
 
 	std::vector<Tetrimino::Figure> nextTetriminos;
@@ -106,8 +106,8 @@ GameState Filer::read(std::ifstream& file)
  */
 void Filer::write(std::vector<PlayState> history)
 {
-	std::filesystem::remove_all(initialPath);
-	std::filesystem::create_directory(initialPath);
+	std::filesystem::remove_all(INITIAL_PATH);
+	std::filesystem::create_directory(INITIAL_PATH);
 
 	const size_t initialSize{ history.size() };
 	for (size_t i{ 0 }; i < initialSize; ++i)
@@ -118,18 +118,13 @@ void Filer::write(std::vector<PlayState> history)
 
 		PlayState current{ history.back() };
 
-		std::ofstream file;
+		std::ofstream file{filename};
+		file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
 
-		file.open(filename);
-		if (file.fail() || file.bad()) {
-			Logger::error(filename + " could not be opened.");
-			throw std::ios_base::failure(strerror(errno));
-		}
 		file << current.getId() << std::endl;
 		file << current.getLastTetrimino() << std::endl;
 		file << current.getLastRotation() << std::endl;
 		current.getPlayArea().print(file);
-		file.close();
 
 		history.pop_back();
 	}

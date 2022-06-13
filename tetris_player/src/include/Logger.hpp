@@ -32,7 +32,9 @@ public:
  	 * @details Method that records the processing time
 	 * @return u_int64_t value
 	 */
-	static u_int64_t duration();
+	static void error(const std::string& message, const std::exception& e);
+
+	static std::string deduce_exception_what(const std::exception& e);
 
 	/**
  	 * @details start the timer
@@ -40,6 +42,10 @@ public:
 	static void setStart();
 private:
 	static std::chrono::high_resolution_clock::time_point start;
+
+	static u_int64_t duration();
+
+	static void print_exception(const std::exception& e, int level = 0);
 };
 
 std::chrono::high_resolution_clock::time_point Logger::start{
@@ -53,7 +59,7 @@ std::chrono::high_resolution_clock::time_point Logger::start{
  */
 void Logger::info(const std::string& message)
 {
-	std::cout << "[" << duration() << "ms]" << "[INFO]: "
+	std::cout << "[" << duration() << " ms]" << "[INFO]: "
 			  << message << std::endl;
 }
 
@@ -64,9 +70,16 @@ void Logger::info(const std::string& message)
  */
 void Logger::error(const std::string& message)
 {
-	std::cerr << "[" << duration() << "ms]" << "[ERROR]: "
+	std::cerr << "[" << duration() << " ms]" << "[ERROR]: "
 			  << message << std::endl;
 }
+
+void Logger::error(const std::string& message, const std::exception& e)
+{
+	error(message);
+	print_exception(e);
+}
+
 
 /**
  * @brief Determines the time it takes to process each method or action.
@@ -77,6 +90,29 @@ u_int64_t Logger::duration()
 {
 	return std::chrono::duration_cast<std::chrono::milliseconds>
 			(std::chrono::high_resolution_clock::now() - start).count();
+}
+
+void Logger::print_exception(const std::exception& e, int level)
+{
+	std::cerr << "Caused by: " << e.what() << std::endl;
+	try
+	{
+		std::rethrow_if_nested(e);
+	}
+	catch (const std::exception& ne)
+	{
+		print_exception(ne, level + 1);
+	}
+}
+
+std::string Logger::deduce_exception_what(const std::exception& e)
+{
+	try {
+		std::rethrow_if_nested(e);
+	} catch(const std::exception& ne) {
+		return deduce_exception_what(ne);
+	}
+	return e.what();
 }
 
 /**

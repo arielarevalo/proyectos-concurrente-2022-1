@@ -22,8 +22,8 @@ public:
 	 */
 	std::vector<PlayState>& getBestMoves();
 
-	explicit Solver(GameState gameState)
-			:gameState(std::move(gameState))
+	explicit Solver(const GameState& gameState)
+			:gameState(gameState)
 	{
 	}
 
@@ -43,7 +43,7 @@ private:
 	 */
 	bool compareToBest(const PlayState& current);
 
-	GameState gameState;
+	const GameState& gameState;
 	std::vector<PlayState> history{};
 };
 
@@ -56,9 +56,12 @@ std::vector<PlayState>& Solver::getBestMoves()
 {
 	PlayState initial{ gameState };
 	findBestMoves(initial, INITIAL_DEPTH);
-	if (!history.empty()) {
+	if (!history.empty())
+	{
 		return history;
-	} else {
+	}
+	else
+	{
 		throw std::domain_error("No valid moves down to requested depth.");
 	}
 }
@@ -73,8 +76,8 @@ std::vector<PlayState>& Solver::getBestMoves()
  */
 bool Solver::findBestMoves(const PlayState& current, int currentDepth)
 {
-	int finalDepth{ gameState.depth };
-	bool isHighScore{false};
+	int finalDepth{ static_cast<int>(gameState.depth) };
+	bool isHighScore{ false };
 
 	if (currentDepth < finalDepth)
 	{
@@ -106,9 +109,9 @@ bool Solver::findChildren(const PlayState& parent, int parentDepth)
 	int currentDepth{ parentDepth + 1 };
 
 	Tetrimino::Figure nextTetrimino{ gameState.nextTetriminos[currentDepth] };
-	int rotations{ Tetrimino::getTetriminoRotations(nextTetrimino) };
+	size_t rotations{ Tetrimino::getTetriminoRotations(nextTetrimino) };
 
-	for (int r{ 0 }; r < rotations; ++r)
+	for (size_t r{ 0 }; r < rotations; ++r)
 	{
 		for (size_t c{ 0 }; c < parent.getPlayArea().cols; ++c)
 		{
