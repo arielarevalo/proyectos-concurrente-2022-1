@@ -4,32 +4,43 @@
 #pragma once
 
 #include <iostream>
-#include "prodcons/Consumer.hpp"
-#include "TetrisWorkUnit.hpp"
+#include "./prodcons/Consumer.hpp"
+#include "./TetrisWorkUnit.hpp"
 
-class TetrisConsumer : public Consumer<TetrisWorkUnit> {
+class TetrisConsumer : public Consumer<TetrisWorkUnit>
+{
 public:
-    TetrisConsumer() {}
+	TetrisConsumer(Queue<TetrisWorkUnit>* consumingQueue,
+			const TetrisWorkUnit& stopCondition,
+			bool createOwnQueue)
+			:Consumer(consumingQueue, stopCondition,
+			createOwnQueue)
+	{
+	}
 
-    void consume(TetrisWorkUnit tetrisWorkUnit) override;
+	void consume(TetrisWorkUnit tetrisWorkUnit) override;
 
-    int run() override;
+	int run() override;
 };
 
-int TetrisConsumer::run() {
-    this->consumeForever();
+int TetrisConsumer::run()
+{
+	this->consumeForever();
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
-void TetrisConsumer::consume(TetrisWorkUnit tetrisWorkUnit) {
-    if (tetrisWorkUnit.number > 0) {
-        *tetrisWorkUnit.result = 1;
+void TetrisConsumer::consume(TetrisWorkUnit tetrisWorkUnit)
+{
+	if (tetrisWorkUnit.number > 0)
+	{
+		*tetrisWorkUnit.result = 1;
 
-        for (int i = 1; i <= tetrisWorkUnit.number; ++i) {
-            *tetrisWorkUnit.result *= i;
-        }
-    }
+		for (int i = 1; i <= tetrisWorkUnit.number; ++i)
+		{
+			*tetrisWorkUnit.result *= i;
+		}
+	}
 
-    std::cout << "      Consumed" << tetrisWorkUnit.number << std::endl;
+	std::cout << "      Consumed" << tetrisWorkUnit.number << std::endl;
 }

@@ -5,8 +5,8 @@
 
 #include <vector>
 #include <iostream>
-#include "prodcons/Producer.hpp"
-#include "TetrisWorkUnit.hpp"
+#include "./prodcons/Producer.hpp"
+#include "./TetrisWorkUnit.hpp"
 
 class TetrisProducer : public Producer<TetrisWorkUnit> {
  public:
@@ -33,5 +33,4 @@ int TetrisProducer::run() {
     }
 
     return EXIT_SUCCESS;
-
 }

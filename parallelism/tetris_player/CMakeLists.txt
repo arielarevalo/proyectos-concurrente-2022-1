@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(tetris_player)
+find_package(Threads REQUIRED)
+
 
 set(CMAKE_CXX_STANDARD 17)
 SET (CMAKE_CXX_COMPILER clang++)
@@ -23,6 +25,7 @@ add_executable(${MSAN_TARGET} ${TARGET_SOURCES})
 add_executable(${TSAN_TARGET} ${TARGET_SOURCES})
 add_executable(${UBSAN_TARGET} ${TARGET_SOURCES})
 
+target_link_libraries(${DEFAULT_TARGET} PRIVATE Threads::Threads)
 target_link_options(${ASAN_TARGET} PRIVATE
         -fsanitize=address -fno-omit-frame-pointer)
 target_link_options(${MSAN_TARGET} PRIVATE -fsanitize=memory)

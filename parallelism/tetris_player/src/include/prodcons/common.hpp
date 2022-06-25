@@ -1,7 +1,6 @@
 // Copyright 2021 Jeisson Hidalgo-Cespedes. Universidad de Costa Rica. CC BY 4.0
 
-#ifndef COMMON_HPP
-#define COMMON_HPP
+#pragma once
 
 /// Declare four of the rule-of-the-five methods
 #define DECLARE_RULE4(Class, action) \
@@ -15,6 +14,5 @@
   DECLARE_RULE4(Class, delete)
 
 /// For data transmissions
-typedef unsigned char byte;
+using byte = unsigned char;
 
-#endif  // COMMON_HPP

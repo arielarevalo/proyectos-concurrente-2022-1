@@ -2,8 +2,7 @@
 /// This code is released under the GNU Public License version 3
 /// @author Jeisson Hidalgo-Céspedes <jeisson.hidalgo@ucr.ac.cr>
 
-#ifndef ASSEMBLER_HPP
-#define ASSEMBLER_HPP
+#pragma once
 
 #include "Consumer.hpp"
 #include "Producer.hpp"
@@ -24,25 +23,21 @@
  * consumed, then do some work with the product, and finally call produce()
  * to push the resulting product to the assembly line.
  */
-template <typename ConsumingType, typename ProducingType>
+template<typename ConsumingType, typename ProducingType>
 class Assembler
-  : public Consumer<ConsumingType>
-  , public Producer<ProducingType> {
-  /// Objects of this class cannot be copied
-  DISABLE_COPY(Assembler);
+		: public Consumer<ConsumingType>, public Producer<ProducingType>
+{
+	/// Objects of this class cannot be copied
+	DISABLE_COPY(Assembler);
 
- public:
-  /// Constructor
-  explicit Assembler(Queue<ConsumingType>* consumingQueue = nullptr
-    , Queue<ProducingType>* producingQueue = nullptr
-    , const ConsumingType& stopCondition = ConsumingType())
-    : Consumer<ConsumingType>(consumingQueue, stopCondition)
-    , Producer<ProducingType>(producingQueue) {
-  }
-
-  /// Destructor
-  virtual ~Assembler() {
-  }
+public:
+	/// Constructor
+	explicit Assembler(Queue<ConsumingType>* consumingQueue = nullptr,
+			Queue<ProducingType>* producingQueue = nullptr,
+			const ConsumingType& stopCondition = ConsumingType())
+			:Consumer<ConsumingType>(consumingQueue, stopCondition),
+			 Producer<ProducingType>(producingQueue)
+	{
+	}
 };
 
-#endif  // ASSEMBLER_HPP
