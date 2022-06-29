@@ -6,7 +6,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "./Matrix.hpp"
+#include "Matrix.hpp"
 #include "./Tetrimino.hpp"
 
 /**

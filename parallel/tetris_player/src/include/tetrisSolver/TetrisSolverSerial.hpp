@@ -6,9 +6,9 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "Filer.hpp"
-#include "GameState.hpp"
-#include "Solver.hpp"
+#include "../file/FileEditor.hpp"
+#include "../common/GameState.hpp"
+#include "./Solver.hpp"
 
 /**
  * @brief Solves a given game state by finding the best moves and outputting

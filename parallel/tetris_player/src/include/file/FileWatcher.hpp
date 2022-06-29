@@ -12,8 +12,8 @@
 #include <functional>
 #include <string>
 #include <vector>
-#include "./TetrisSolverSerial.hpp"
-#include "./Logger.hpp"
+#include "../tetrisSolver/TetrisSolverSerial.hpp"
+#include "../logger/Logger.hpp"
 
 using inotify_event = struct inotify_event;
 

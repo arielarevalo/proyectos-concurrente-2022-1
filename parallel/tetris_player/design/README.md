@@ -41,12 +41,13 @@
 
 ### Arquitecturales:
 
+* Implementar concurrencia
+* Utilizar paradigma productor/consumidor.
 * Validar entradas.
 * Utilizar estructuras de datos a la medida o adaptadas, con crédito.
 * No optimizar para tiempo de ejecución.
 * Hacer pruebas, así como análisis con las herramientas vistas en clase.
 * Diseñar de forma desacoplada; preparar con UML.
-* Utilizar mapeo de bloque o mapeo dinámico para asignar a los hilos sus tareas.
 
 ## Implementación
 
@@ -73,10 +74,10 @@ respecto a los requisitos es el siguiente:
 
 ### FileWatcher
 
-El `FileWatcher` corre con la función `start()`, punto a partir del cual 
-cualquier archivo con el nombre `tetris_state.txt` que sea movido a la 
-carpeta `./bin/put` será detectado a través de la biblioteca `inotify` de 
-Linux, y será enviado a procesar con el `TetrisSolverSerial`. Una vez que el 
+El `FileWatcher` corre con la función `start()`, punto a partir del cual
+cualquier archivo con el nombre `tetris_state.txt` que sea movido a la
+carpeta `./bin/put` será detectado a través de la biblioteca `inotify` de
+Linux, y será enviado a procesar con el `TetrisSolverSerial`. Una vez que el
 archivo sea procesado, se borra.
 
 ### Filer

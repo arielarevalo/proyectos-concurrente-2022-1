@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "./common.hpp"
+#include "./Common.hpp"
 
 // macOS only uses named semaphores
 #if __APPLE__ && __MACH__

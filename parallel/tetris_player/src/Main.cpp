@@ -1,7 +1,7 @@
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>.
 
-#include "./include/FileWatcher.hpp"
-#include "./include/ConcurrencyManager.hpp"
+#include "include/file/FileWatcher.hpp"
+#include "include/concurrent/Manager.hpp"
 
 /**
  * @brief Entry point.
@@ -11,7 +11,7 @@ int main()
 	try
 	{
 		//FileWatcher::start();
-        ConcurrencyManager::processTetrisState();
+        Manager::processTetrisState();
 	}
 	catch (const std::exception& e)
 	{

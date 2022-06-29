@@ -6,7 +6,7 @@
 
 #include <thread>
 
-#include "./common.hpp"
+#include "./Common.hpp"
 
 /**
  * @brief Base and wrapper class for managing execution threads

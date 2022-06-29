@@ -9,9 +9,9 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
-#include "./GameState.hpp"
-#include "./Logger.hpp"
-#include "./PlayState.hpp"
+#include "../common/GameState.hpp"
+#include "../logger/Logger.hpp"
+#include "../common/PlayState.hpp"
 
 /**
  * @brief Reads input file to game state and writes to output file with
