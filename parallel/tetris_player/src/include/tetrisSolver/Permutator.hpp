@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <queue>
+#include "common/History.hpp"
 
 class Permutator {
 public:
@@ -15,10 +16,10 @@ public:
 	 * @param parentDepth Parent solution depth.
 	 * @return Whether a high score was found in children.
 	 */
-    static std::queue<History> permutate(const History& parent);
+    static std::queue<History> permutate(History& parent);
 };
 
-std::queue<History> Permutator::permutate(const History& parent)
+std::queue<History> Permutator::permutate(History& parent)
 {
     int currentDepth{ parent.size() - 1 };
 
@@ -31,7 +32,8 @@ std::queue<History> Permutator::permutate(const History& parent)
     {
         for (size_t c{ 0 }; c < parent.getPlayArea().cols; ++c)
         {
-            histories.push(History{parent, nextTetrimino, r, c});
+			parent.setState(nextTetrimino, r, c);
+            histories.push(parent);
         }
     }
 

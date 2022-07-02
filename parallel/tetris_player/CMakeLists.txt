@@ -11,7 +11,7 @@ set(SOURCES_DIR ./src)
 set(INCLUDE_DIR ${SOURCES_DIR}/include)
 set(TARGET_SOURCES ${SOURCES_DIR}/Main.cpp)
 
-include_directories(${INCLUDE_DIR})
+include_directories(${INCLUDE_DIR} ${INCLUDE_DIR}/concurrent)
 
 set(DEFAULT_TARGET ${CMAKE_PROJECT_NAME})
 set(ASAN_TARGET ${DEFAULT_TARGET}_asan)

@@ -1,3 +1,4 @@
+/*
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>.
 
 #pragma once
@@ -6,23 +7,27 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "../file/FileEditor.hpp"
+#include "../file/Filer.hpp"
 #include "../common/GameState.hpp"
 #include "./Solver.hpp"
 
+*/
 /**
  * @brief Solves a given game state by finding the best moves and outputting
  * them to files.
- */
+ *//*
+
 class TetrisSolverSerial
 {
 public:
-	/**
+	*/
+/**
 	 * @brief Finds the game state for a file and solves for the best moves.
  	 * @details Reads the file, processes file content, determines the
  	 * optimal move, and generates the output files.
 	 * @param file Input game state file.
-	 */
+	 *//*
+
 	static bool solve(std::ifstream& file);
 };
 
@@ -70,3 +75,4 @@ bool TetrisSolverSerial::solve(std::ifstream& file)
 		);
 	}
 }
+*/

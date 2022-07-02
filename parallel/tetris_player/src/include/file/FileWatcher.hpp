@@ -7,13 +7,18 @@
 #include <sys/inotify.h>
 #include <unistd.h>
 #include <csignal>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
+
+#include "../Solver.hpp"
 #include "../tetrisSolver/TetrisSolverSerial.hpp"
 #include "../logger/Logger.hpp"
+#include "./Filer.hpp"
 
 using inotify_event = struct inotify_event;
 
@@ -141,13 +146,13 @@ void FileWatcher::processEvents(const std::vector<const inotify_event*>& events)
 
 		std::string path{ INITIAL_PATH + std::string(event->name) };
 
-		if (event->mask & IN_CREATE
+		if (event->mask & IN_CLOSE_WRITE
 				&& !(event->mask & IN_ISDIR)
 				&& std::string(TARGET) == std::string(event->name))
 		{
 			Logger::info("Successfully found tetris game state file.");
 
-			processFileWithRetry(path);
+			processFile(path);
 
 			std::filesystem::remove(path);
 		}
@@ -163,47 +168,24 @@ void FileWatcher::processFile(const std::string& path)
 	std::ifstream file{ path };
 	file.exceptions(
 			std::ifstream::badbit | std::ifstream::failbit);
+
+	std::unique_ptr<GameState> gameState;
 	try
 	{
-		TetrisSolverSerial::solve(file);
+		gameState = std::make_unique<GameState>(Filer::read(file));
 	}
 	catch (const std::exception& e)
 	{
-		if (Logger::deduce_exception_what(e)
-				== std::string(RETRY_ERROR))
-		{
-			throw; // To retry handler
-		}
-		else
-		{
-			Logger::error("Unable to process file: " + path, e);
-		}
+		Logger::error("Unable to process file: " + path, e);
 	}
-}
 
-void FileWatcher::processFileWithRetry(const std::string& path)
-{
-	for (ssize_t i{ 0 }; i < MAX_RETRIES; ++i)
+	try
 	{
-		try
-		{
-			processFile(path);
-			break;
-		}
-		catch (const std::exception&)
-		{
-			if (i < MAX_RETRIES - 1)
-			{
-				Logger::error("Failed to properly open tetris game "
-							  "state file: " + path + " Attempt: "
-						+ std::to_string(i + 1));
-			}
-			else
-			{
-				Logger::error(
-						"Unable to process file: " + path + "\n Please retry.");
-			}
-		}
+		Solver::processGameState(*gameState);
+	}
+	catch (const std::exception& e)
+	{
+		Logger::error("Solver has crashed.", e);
 	}
 }
 
