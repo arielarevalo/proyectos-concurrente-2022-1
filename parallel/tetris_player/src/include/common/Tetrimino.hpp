@@ -76,7 +76,7 @@ public:
 	 * @param h Height of the Tetrimino.
 	 * @param w Width of the Tetrimino.
 	 * @param value Shape of Tetrimino.
-	 * @return Width size list of bounds for given Tetrimino shape.
+	 * @return Width getSize list of bounds for given Tetrimino shape.
 	 */
 	static std::vector<size_t> findBounds(size_t h, size_t w,
 			const std::vector<std::string>& value);
