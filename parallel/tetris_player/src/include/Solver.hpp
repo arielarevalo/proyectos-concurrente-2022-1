@@ -74,7 +74,14 @@ History Solver::processGameState(const GameState& gameState)
 
 	statusQueue->waitForConsumers();
 
-	return highScore;
+	if (!highScore.isEmpty())
+	{
+		return highScore;
+	}
+	else
+	{
+		throw std::domain_error("No valid moves down to requested depth.");
+	}
 }
 
 int Solver::TAssembler::run()
@@ -86,20 +93,22 @@ int Solver::TAssembler::run()
 
 void Solver::TAssembler::consume(History history)
 {
-	/*
-	 * * history.back() conseguir el ultimo elemento
-	 * * hacer place sobre el último con los datos aux.
-	 * * si el place es exitoso
-	 * 		* si el size de history es igual a prof máx + 1
-	 * 				* Compare
-	 * 				* History.setDone()
-	 * 			* si no
-	 * 				* Permutar el último
-	 * * si no
-	 * 		* History.setDone()
-	 */
-
-	StatusAssembler<History>::consume(history);
+//	 * * history.getLast() conseguir el ultimo elemento
+//	 * * hacer place (sobreescribir) sobre el último con los datos aux.
+//	 * * si el place es exitoso
+//	 * 		* si el getSize de history es igual a prof máx + 1
+//	 * 				* Compare
+//	 * 				* History.setDone()
+					StatusAssembler<History>::consume(history);
+//	 * 		* si no
+//	 * 				* "Permutar" el último
+//	 *				* for loop (each queue<history>)
+					StatusAssembler<History>::consume(history);
+//	 *				* END FOR
+//	 *
+//	 * * si no
+//	 * 		* History.setDone()
+			StatusAssembler<History>::consume(history);
 }
 
 void Solver::TAssembler::produce(const History& history)

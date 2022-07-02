@@ -10,8 +10,8 @@
 #include <algorithm>
 #include <cstring>
 #include "../common/GameState.hpp"
-#include "../logger/Logger.hpp"
 #include "../common/PlayState.hpp"
+#include "../logger/Logger.hpp"
 
 /**
  * @brief Reads input file to game state and writes to output file with
@@ -20,6 +20,15 @@
 class Filer
 {
 public:
+	static constexpr char INITIAL_PATH[7]{ "./put/" };
+	static constexpr char TARGET[17]{ "tetris_state.txt" };
+	static constexpr char END_TARGET[15]{ "tetris_end.txt" };
+
+	/**
+	 * Sets working directory to its initial state.
+	 */
+	static void initialize();
+
 	/**
 	 * @brief Reads input file into a new game state.
 	 * @param file File to read from.
@@ -32,10 +41,13 @@ public:
 	 * @param history List of ancestors of best play state.
 	 */
 	static void write(std::vector<PlayState> history);
-
-private:
-	static constexpr char INITIAL_PATH[7]{ "./put/" };
 };
+
+void Filer::initialize()
+{
+	std::filesystem::remove_all(INITIAL_PATH);
+	std::filesystem::create_directory(INITIAL_PATH);
+}
 
 GameState Filer::read(std::ifstream& file)
 {
@@ -88,8 +100,7 @@ GameState Filer::read(std::ifstream& file)
 
 void Filer::write(std::vector<PlayState> history)
 {
-	std::filesystem::remove_all(INITIAL_PATH);
-	std::filesystem::create_directory(INITIAL_PATH);
+	initialize();
 
 	const size_t initialSize{ history.size() };
 	for (size_t i{ 0 }; i < initialSize; ++i)
@@ -100,7 +111,7 @@ void Filer::write(std::vector<PlayState> history)
 
 		PlayState current{ history.back() };
 
-		std::ofstream file{filename};
+		std::ofstream file{ filename };
 		file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
 
 		file << current.getId() << std::endl;
@@ -110,4 +121,7 @@ void Filer::write(std::vector<PlayState> history)
 
 		history.pop_back();
 	}
+
+	std::filesystem::remove(
+			std::string{ INITIAL_PATH } + std::string{ TARGET });
 }

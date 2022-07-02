@@ -1,7 +1,9 @@
-// Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>.
+// Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>
+// Copyright 2022 Pablo Madrigal Ramirez <pablo.madrigalramirez@ucr.ac.cr>
 
 #include "include/file/FileWatcher.hpp"
-#include "Solver.hpp"
+#include "include/file/Filer.hpp"
+#include "./TetrisPlayer.h"
 
 /**
  * @brief Entry point.
@@ -10,11 +12,11 @@ int main()
 {
 	try
 	{
-		FileWatcher::start();
+		TetrisPlayer::start();
 	}
 	catch (const std::exception& e)
 	{
-		Logger::error("FailWatcher has crashed.", e);
+		Logger::error("TetrisPlayer has crashed.", e);
 	}
 	exit(1);
 }

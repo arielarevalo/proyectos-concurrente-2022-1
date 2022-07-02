@@ -50,12 +50,5 @@ std::vector<PlayState>& Solver::solveBestMoves()
 
 	findBestMoves(initial, INITIAL_DEPTH);
 
-	if (!history.empty())
-	{
-		return history;
-	}
-	else
-	{
-		throw std::domain_error("No valid moves down to requested depth.");
-	}
+
 }*/
