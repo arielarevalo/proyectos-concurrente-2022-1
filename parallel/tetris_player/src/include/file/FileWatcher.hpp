@@ -38,30 +38,31 @@ public:
 
 private:
     /**
-     * @brief Signal handler that terminates FileWatcher process.
-     */
-    static void finalize(int sig);
-
-    static bool validateEvent(
-            const inotify_event* event,
-            std::basic_string<char> event_name);
-
-    /**
      * @brief Builds a list of event pointers from points in a text buffer
      * containing the contents of the events.
      * @param eventBuffer Text buffer containing event contents.
      * @param length Length of the text buffer.
      * @return List of event pointers.
      */
-    static const std::vector<const inotify_event*>
+    static std::vector<const inotify_event*>
     buildEvents(const char* eventBuffer, ssize_t length);
+
+	/**
+	 *
+	 * @param event
+	 * @param event_name
+	 * @return
+	 */
+	static bool validateEvent(
+			const inotify_event* event,
+			std::basic_string<char> event_name);
 
     /**
      * @brief Checks if passed events include target filename, and processes
      * it if found.
      * @param events Events to process.
      */
-    static bool processEvents(const std::vector<const inotify_event*>& events);
+    static void processEvents(const std::vector<const inotify_event*>& events);
 
     /**
      * @brief Opens file at a given path and solves it as a Tetris game state.
@@ -69,32 +70,20 @@ private:
      */
     static void processFile(const std::string& path);
 
-    /**
-     * @brief Decorates ::processFile with the set number of max retries.
-     * @param path Path to file to solve.
-     */
-    static void processFileWithRetry(const std::string& path);
-
     static const ssize_t EVENT_SIZE{ sizeof(inotify_event) };
     static const ssize_t BUF_LEN{ 1024 * (EVENT_SIZE + 16) };
-    static const ssize_t MAX_RETRIES{ 5 };
     static constexpr char INITIAL_PATH[7]{ "./put/" };
     static constexpr char TARGET[17]{ "tetris_state.txt" };
     static constexpr char ENDTARGET[15]{ "tetris_end.txt" };
-    static constexpr char RETRY_ERROR[33]{ "basic_ios::clear: iostream error" };
 };
 
-__attribute__((noreturn)) void FileWatcher::start()
+void FileWatcher::start()
 {
-    std::signal(SIGINT, finalize);
-
     std::filesystem::remove_all(INITIAL_PATH);
     std::filesystem::create_directory(INITIAL_PATH);
 
-    bool listen_events = true;
-
     Logger::info("Starting file watching loop.");
-    while (listen_events)
+    while (true)
     {
         int fd{ inotify_init() };
         if (fd < 0)
@@ -122,14 +111,14 @@ __attribute__((noreturn)) void FileWatcher::start()
                 buildEvents(eventBuffer, length)
         };
 
-        listen_events = processEvents(events);
+        processEvents(events);
 
         (void)inotify_rm_watch(fd, wd);
         (void)close(fd);
     }
 }
 
-const std::vector<const inotify_event*>
+std::vector<const inotify_event*>
 FileWatcher::buildEvents(const char* eventBuffer, ssize_t length)
 {
     std::vector<const inotify_event*> events{};
@@ -145,7 +134,7 @@ FileWatcher::buildEvents(const char* eventBuffer, ssize_t length)
     return events;
 }
 
-bool FileWatcher::processEvents(const std::vector<const inotify_event*>& events)
+void FileWatcher::processEvents(const std::vector<const inotify_event*>& events)
 {
     for (const inotify_event* event : events)
     {
@@ -154,8 +143,9 @@ bool FileWatcher::processEvents(const std::vector<const inotify_event*>& events)
         std::string path{ INITIAL_PATH + std::string(event->name) };
 
         if (validateEvent(event, std::string(ENDTARGET))) {
-            Logger::info("Successfully found stop listen events file.");
-            return false;
+            Logger::info("Successfully found stop listen events file. Finalizing.");
+
+			exit(0);
         }
 
         if (validateEvent(event, std::string(TARGET)))
@@ -171,8 +161,6 @@ bool FileWatcher::processEvents(const std::vector<const inotify_event*>& events)
             Logger::info("File was not a tetris game state file.");
         }
     }
-
-    return true;
 }
 
 bool FileWatcher::validateEvent(
@@ -182,7 +170,6 @@ bool FileWatcher::validateEvent(
         return (event->mask & IN_CLOSE_WRITE
                 && !(event->mask & IN_ISDIR)
                 && event_name == std::string(event->name));
-
 }
 
 void FileWatcher::processFile(const std::string& path)
@@ -209,10 +196,4 @@ void FileWatcher::processFile(const std::string& path)
 	{
 		Logger::error("Solver has crashed.", e);
 	}
-}
-
-__attribute__((noreturn)) void FileWatcher::finalize([[maybe_unused]]int sig)
-{
-    Logger::info("Received abort signal. Finalizing.");
-    exit(0);
 }
