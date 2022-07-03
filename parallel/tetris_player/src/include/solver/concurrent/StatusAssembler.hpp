@@ -3,7 +3,11 @@
 
 #pragma once
 
+#include <memory>
+
 #include "./jeisson/Assembler.hpp"
+#include "./StatusConsumer.hpp"
+#include "./StatusProducer.hpp"
 #include "./StatusQueue.hpp"
 
 template<typename T>
@@ -14,36 +18,36 @@ class StatusQueue;
  * @tparam T
  */
 template<typename T>
-class StatusAssembler : public StatusConsumer<T>, public Producer<T>
+class StatusAssembler : public StatusConsumer<T>, public StatusProducer<T>
 {
 public:
 	explicit StatusAssembler(const T& stopCondition)
-	: StatusConsumer<T>(stopCondition) {}
+			:StatusConsumer<T>(stopCondition),
+			 StatusProducer<T>()
+	{
+	}
 
-	virtual void consume(T data) = 0;
+	void finalize() override;
 
-	void setStatusQueue(StatusQueue<T> statusQueue);
+	void
+	setConsumingQueue(std::shared_ptr<StatusQueue<T>> consumingQueue) override;
 };
 
 template<typename T>
-void StatusAssembler<T>::consume(T data)
+void StatusAssembler<T>::finalize()
 {
-	if(this->consumingQueue->isDone()) {
-		size_t numMembers{ this->consumingQueue->getMembersSize()};
+	size_t numMembers{ this->consumingQueue->getMembersSize() };
 
-		for(size_t w{0}; w < numMembers; ++w) {
-			this->produce(this->stopCondition);
-		}
-	} else {
-		this->produce(data);
+	for (size_t w{ 0 }; w < numMembers; ++w)
+	{
+		this->produce(this->stopCondition);
 	}
 }
 
 template<typename T>
-void StatusAssembler<T>::setStatusQueue(StatusQueue<T> statusQueue)
+void StatusAssembler<T>::setConsumingQueue(
+		std::shared_ptr<StatusQueue<T>> consumingQueue)
 {
-	this->setProducingQueue(statusQueue);
-	this->setConsumingQueue(statusQueue);
+	StatusProducer<T>::setProducingQueue(consumingQueue);
+	StatusConsumer<T>::setConsumingQueue(consumingQueue);
 }
-
-

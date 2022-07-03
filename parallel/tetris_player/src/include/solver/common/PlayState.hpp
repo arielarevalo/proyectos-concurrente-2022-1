@@ -95,7 +95,7 @@ bool PlayState::place(Tetrimino::Figure figure, size_t rotation, size_t column)
 		}
 	}
 
-	/* With starting position at each column based on bounds, check at each
+	/* With starting position at each column based on bounds, finalize at each
 	 * column if next downward cell is non-zero, if so, stop. At this point
 	 * "d" is the displacement of the tetrimino from the initial position. */
 	size_t d{ 0 };

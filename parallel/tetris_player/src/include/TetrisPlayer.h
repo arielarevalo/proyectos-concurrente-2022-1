@@ -15,7 +15,7 @@ public:
 	/**
  * @brief Starts watching the target directory.
  * @details Watches a directory using the inotify library to continuously
- * monitor a specific folder and, on given file system events, check
+ * monitor a specific folder and, on given file system events, finalize
  * for target file names and process the files.
  */
 	static void start();
@@ -63,6 +63,9 @@ void TetrisPlayer::start()
 			}
 			catch (const std::invalid_argument&)
 			{
+				// TODO(aarevalo) Logger::error("Failed to validate input
+				//  file values.",
+				// ia);
 				std::throw_with_nested(
 						std::invalid_argument(
 								"Failed to validate input file values.")

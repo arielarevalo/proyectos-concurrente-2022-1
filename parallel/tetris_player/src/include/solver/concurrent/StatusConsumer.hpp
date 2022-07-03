@@ -3,68 +3,94 @@
 
 #pragma once
 
+#include <memory>
+
+#include "./jeisson/Thread.hpp"
 #include "./StatusQueue.hpp"
 
 template<typename T>
 class StatusQueue;
 
 template<typename T>
-class StatusConsumer : public virtual Thread {
+class StatusConsumer : public virtual Thread
+{
 
 	DISABLE_COPY(StatusConsumer);
 
 public:
 	explicit StatusConsumer(const T& stopCondition)
-	: stopCondition(stopCondition) {}
+			:stopCondition(stopCondition)
+	{
+	}
 
-	void consumeForever();
+	void check();
+
+	virtual void finalize() = 0;
 
 	virtual void consume(T data) = 0;
 
-	bool isBusy();
+	virtual void consumeForever();
 
-	void setConsumingQueue(StatusQueue<T>* consumingQueue);
+	virtual void setConsumingQueue(
+			std::shared_ptr<StatusQueue<T>> consumingQueue);
+
+	bool isBusy() const;
 
 protected:
 	const T stopCondition;
 
-	StatusQueue<T>* consumingQueue;
+	std::shared_ptr<StatusQueue<T>> consumingQueue;
 
 private:
 	bool busy{ false };
 };
 
 template<typename T>
-void StatusConsumer<T>::consumeForever()
+void StatusConsumer<T>::check()
 {
-	assert(this->consumingQueue);
-	while (true)
+	if (this->consumingQueue->isDone())
 	{
-		T data = this->consumingQueue->pop();
-
-		this->busy = true;
-
-		if (data == this->stopCondition)
-		{
-			this->busy = false;
-
-			break;
-		}
-
-		this->consume(data);
-
-		this->busy = false;
+		finalize();
 	}
 }
 
 template<typename T>
-void StatusConsumer<T>::setConsumingQueue(StatusQueue<T>* consumingQueue)
+void StatusConsumer<T>::consumeForever()
+{
+	assert(consumingQueue);
+	while (true)
+	{
+		T data{ consumingQueue->pop() };
+
+		busy = true;
+
+		consumingQueue->refreshSize();
+
+		if (data == stopCondition)
+		{
+			busy = false;
+			break;
+		}
+
+		consume(data);
+
+		consumingQueue->refreshSize();
+
+		busy = false;
+
+		check();
+	}
+}
+
+template<typename T>
+void StatusConsumer<T>::setConsumingQueue(
+		std::shared_ptr<StatusQueue<T>> consumingQueue)
 {
 	this->consumingQueue = consumingQueue;
 }
 
 template<typename T>
-bool StatusConsumer<T>::isBusy()
+bool StatusConsumer<T>::isBusy() const
 {
 	return busy;
 }
