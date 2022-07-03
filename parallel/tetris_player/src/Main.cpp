@@ -1,9 +1,7 @@
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>
 // Copyright 2022 Pablo Madrigal Ramirez <pablo.madrigalramirez@ucr.ac.cr>
 
-#include "include/file/FileWatcher.hpp"
-#include "include/file/Filer.hpp"
-#include "./TetrisPlayer.h"
+#include "./include/TetrisPlayer.h"
 
 /**
  * @brief Entry point.

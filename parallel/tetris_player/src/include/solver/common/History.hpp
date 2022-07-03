@@ -10,7 +10,11 @@
 #include "./GameState.hpp"
 #include "./PlayState.hpp"
 
-class History {
+/**
+ * Work Unit
+ */
+class History
+{
 public:
     explicit History(const GameState &gameState)
             : gameState(gameState) {
@@ -36,6 +40,8 @@ public:
     void setState(size_t nextRotation, size_t nextColumn);
 
     void push(const std::shared_ptr<PlayState> &playState);
+
+	std::shared_ptr<PlayState> pop();
 
     bool reviewCurrentDepth() const;
 
@@ -122,6 +128,12 @@ void History::setDone() {
 
 bool History::isEmpty() const {
     return value.empty();
+}
+std::shared_ptr<PlayState> History::pop()
+{
+	std::shared_ptr<PlayState> out{ value.front() };
+	value.pop();
+	return out;
 }
 
 bool History::reviewCurrentDepth() const {

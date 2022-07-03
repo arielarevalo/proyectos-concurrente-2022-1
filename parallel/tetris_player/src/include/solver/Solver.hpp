@@ -79,6 +79,7 @@ History Solver::processGameState(const GameState &gameState) {
     statusQueue->waitForConsumers();
 
     if (!highScore.isEmpty()) {
+		Logger::info("Successfully found best moves for game state.");
         return highScore;
     } else {
         throw std::domain_error("No valid moves down to requested depth.");

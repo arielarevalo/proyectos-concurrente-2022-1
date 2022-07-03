@@ -8,10 +8,8 @@
 #include <unistd.h>
 #include <cstring>
 #include <string>
+#include <ios>
 #include <vector>
-
-#include "../logger/Logger.hpp"
-#include "./Filer.hpp"
 
 using inotify_event = struct inotify_event;
 
@@ -23,9 +21,22 @@ class FileWatcher
 public:
 	/**
 	 *
+	 * @param initialPath
+	 * @param target
+	 * @param endTarget
+	 */
+	FileWatcher(const std::string& initialPath,
+			std::string_view target,
+			std::string_view endTarget)
+			: initialPath(initialPath),
+			target(target),
+			endTarget(endTarget) {}
+
+	/**
+	 *
 	 * @return
 	 */
-	static std::string watch();
+	std::string watch();
 
 private:
 	/**
@@ -35,7 +46,7 @@ private:
 	 * @param length Length of the text buffer.
 	 * @return List of event pointers.
 	 */
-	static std::vector<const inotify_event*>
+	std::vector<const inotify_event*>
 	buildEvents(const char* eventBuffer, ssize_t length);
 
 	/**
@@ -44,19 +55,23 @@ private:
 	 * @param event_name
 	 * @return
 	 */
-	static bool validateEvent(const inotify_event* event);
+	bool validateEvent(const inotify_event* event) const;
 
 	/**
 	 * @brief Checks if passed events include target filename, and processes
 	 * it if found.
 	 * @param events Events to process.
 	 */
-	static std::string processEvents(
+	std::string processEvents(
 			const std::vector<const inotify_event*>& events
 	);
 
-	static const ssize_t EVENT_SIZE{ sizeof(inotify_event) };
-	static const ssize_t BUF_LEN{ 1024 * (EVENT_SIZE + 16) };
+	const ssize_t EVENT_SIZE{ sizeof(inotify_event) };
+	const ssize_t BUF_LEN{ 1024 * (EVENT_SIZE + 16) };
+
+	const std::string initialPath;
+	const std::string target;
+	const std::string endTarget;
 };
 
 std::string FileWatcher::watch()
@@ -68,7 +83,7 @@ std::string FileWatcher::watch()
 				std::string(std::strerror(errno)));
 	}
 
-	int wd{ inotify_add_watch(fd, Filer::INITIAL_PATH, IN_CLOSE_WRITE) };
+	int wd{ inotify_add_watch(fd, initialPath.c_str(), IN_CLOSE_WRITE) };
 	if (wd < 0)
 	{
 		throw std::ios::failure("Inotify could not add watch:" +
@@ -112,33 +127,24 @@ FileWatcher::buildEvents(const char* eventBuffer, ssize_t length)
 }
 
 std::string FileWatcher::processEvents(
-		const std::vector<const inotify_event*>&events)
+		const std::vector<const inotify_event*>& events)
 {
 	for (const inotify_event* event : events)
 	{
-		Logger::info("Validating file event: " + std::string(event->name));
-
 		if (validateEvent(event))
 		{
-			return Filer::INITIAL_PATH + std::string(event->name);
+			return initialPath + std::string(event->name);
 		}
 	}
 	return "";
 }
 
-bool FileWatcher::validateEvent(const inotify_event* event)
+bool FileWatcher::validateEvent(const inotify_event* event) const
 {
-	if (event->mask & IN_CLOSE_WRITE
-			&& !(event->mask & IN_ISDIR))
-	{
-		std::string eventName{ event->name };
-		if (Filer::TARGET == eventName || Filer::END_TARGET == eventName)
-		{
-			Logger::info("Successfully found " + eventName + ".");
-			return true;
-		}
-	}
-	Logger::info("File was not a tetris game state file.");
-	return false;
+	std::string eventName{ event->name };
+
+	return event->mask & IN_CLOSE_WRITE
+			&& !(event->mask & IN_ISDIR)
+			&& (target == eventName || endTarget == eventName);
 }
 

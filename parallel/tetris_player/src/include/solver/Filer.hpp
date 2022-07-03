@@ -9,9 +9,9 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
-#include "../common/GameState.hpp"
-#include "../common/PlayState.hpp"
-#include "../logger/Logger.hpp"
+#include "./solver/common/GameState.hpp"
+#include "./solver/common/History.hpp"
+#include "./solver/common/PlayState.hpp"
 
 /**
  * @brief Reads input file to game state and writes to output file with
@@ -40,7 +40,7 @@ public:
 	 * @brief Writes history of best play states into output files.
 	 * @param history List of ancestors of best play state.
 	 */
-	static void write(std::vector<PlayState> history);
+	static void write(History& history);
 };
 
 void Filer::initialize()
@@ -98,18 +98,18 @@ GameState Filer::read(std::ifstream& file)
 	return { id, depth, playArea, nextTetriminos };
 }
 
-void Filer::write(std::vector<PlayState> history)
+void Filer::write(History& history)
 {
 	initialize();
 
-	const size_t initialSize{ history.size() };
+	const size_t initialSize{ history.getSize() };
 	for (size_t i{ 0 }; i < initialSize; ++i)
 	{
 		std::string filename{ "../bin/put/tetris_play_"
 									  + std::to_string(i)
 									  + ".txt" };
 
-		PlayState current{ history.back() };
+		PlayState current{ *history.pop() };
 
 		std::ofstream file{ filename };
 		file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
@@ -118,8 +118,6 @@ void Filer::write(std::vector<PlayState> history)
 		file << current.getLastTetrimino() << std::endl;
 		file << current.getLastRotation() << std::endl;
 		current.getPlayArea().print(file);
-
-		history.pop_back();
 	}
 
 	std::filesystem::remove(
