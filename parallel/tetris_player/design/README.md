@@ -68,25 +68,24 @@ procediente escritura como archivos en el directorio de entrada. En cuanto al
 funcionamiento del `TetrisSolverSerial`, propósito de cada una de sus partes
 respecto a los requisitos es el siguiente:
 
-| Clase              | Propósito                                                                             |
-|--------------------|---------------------------------------------------------------------------------------|
-| GameState          | Contiene la información inicial del estado de juego.                                  |
-| History            | Contiene la estructura de la unidad de trabajo.                                       |
-| Matrix             | Contiene la forma de una area de juego como una matriz de caracteres.                 |
-| PlayState          | Contiene la información de estado de una jugada.                                      |
-| Tetrimino          | Contiene la forma de un tetrimino como una matriz de caracteres.                      |
-| Manager            | Procesar estado de tetris de manera concurrente con el patron Productor - consumidor. |
-| StatusConsumer     | Pendiente.                                                                            |
-| StatusAssembler    | Pendiente.                                                                            |
-| StatusQueue        | Pendiente.                                                                            |
-| FileEditor         | Validación de entradas. Conversión de archivo a `InState` y de `PlayState` a archivo. |
-| FileWatcher        | Monitorea los cambios en el fichero e informa esos cambios al programa.               |
-| Logger             | Gestionar mensajes del estado del programa.                                           |
-| Comparator         | Navega las permutaciones de los `PlayState` y puntúa cada `PlayState.playArea`.       |
-| Permutator         | Generar las unidades de trabajo.                                                      |
-| Solver             | Pendiente.                                                                            |
-| TetrisSolverSerial | Resolver una jugada de tetris.                                                        |
-
+| Clase           | Propósito                                                                             |
+|-----------------|---------------------------------------------------------------------------------------|
+| GameState       | Contiene la información inicial del estado de juego.                                  |
+| History         | Contiene la estructura de la unidad de trabajo.                                       |
+| Matrix          | Contiene la forma de una area de juego como una matriz de caracteres.                 |
+| PlayState       | Contiene la información de estado de una jugada.                                      |
+| Tetrimino       | Contiene la forma de un tetrimino como una matriz de caracteres.                      |
+| Manager         | Procesar estado de tetris de manera concurrente con el patron Productor - consumidor. |
+| StatusConsumer  | Implementacion del Consumer y procesar una unidad de trabajo.                         |
+| StatusAssembler | Implementacion del Assembler.                                                         |
+| StatusProducer  | Implementacion del Producer y coloca unidades de trabajo a la cola.                   |
+| StatusQueue     | Manejo las unidades de trabajo en la cola.                                            |
+| FileEditor      | Validación de entradas. Conversión de archivo a `InState` y de `PlayState` a archivo. |
+| FileWatcher     | Monitorea los cambios en el fichero e informa esos cambios al programa.               |
+| Logger          | Gestionar mensajes del estado del programa.                                           |
+| Comparator      | Navega las permutaciones de los `PlayState` y puntúa cada `PlayState.playArea`.       |
+| Permutator      | Generar las unidades de trabajo.                                                      |
+| Solver          | Resolver una jugada de tetris.                                                        |
 ### FileWatcher
 
 El `FileWatcher` corre con la función `start()`, punto a partir del cual
@@ -112,7 +111,7 @@ Nuestra solución utiliza el código brindado por el profesor para facilitar la 
 el equipo tomó la decisión de realizar implementaciones de las siguientes clases: Queue, Producer, Consumer 
 y Assembler.
 
-### Manager
+### Solver
 El algoritmo `Manager.proccessTetrisState(gameState)` es el punto de inicio en la solucion concurrente,
 se encarga de procesar un GameState con el patron Productor - consumidor
 
@@ -164,6 +163,14 @@ caso se agrega el estado de nivel actual al arreglo `history`.
 
 ### Diagramas
 
+#### Version Serial
 ![Diagrama a nivel de main](diagram.svg)
 
 ![Flow Chart a nivel de main](flowchart.svg)
+
+#### Version Concurrente
+![Diagrama a nivel de main](diagram2.svg)
+
+![figures](http://jocan3.com/misc_images/tetris_prod_cons_diagram.png)
+
+![Flow Chart a nivel de main](flowchart2.svg)
