@@ -114,9 +114,10 @@ void Solver::TAssembler::consume(History history)
 
 void Solver::compare(History& current)
 {
-	std::scoped_lock<std::mutex> lock{ mutex };
+	mutex.lock();
 	if (highScore->isEmpty() || *current.getLast() > *highScore->getLast())
 	{
 		highScore = std::make_unique<History>(current);
 	}
+	mutex.unlock();
 }

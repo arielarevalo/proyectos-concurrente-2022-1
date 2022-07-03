@@ -31,8 +31,6 @@ public:
 
 	void waitForConsumers() const;
 
-	std::shared_ptr<StatusConsumer<T>> getMember(size_t i) const;
-
 	size_t getMembersSize();
 
 	void push(const T& data);
@@ -41,9 +39,9 @@ public:
 
 	void refreshSize();
 
-	bool isDone() const;
+	bool isDone();
 
-	bool isEmpty() const;
+	bool isEmpty();
 
 private:
 	static std::shared_ptr<StatusQueue<T>> statusQueue;
@@ -122,7 +120,7 @@ T StatusQueue<T>::pop()
 }
 
 template<typename T>
-bool StatusQueue<T>::isDone() const
+bool StatusQueue<T>::isDone()
 {
 	bool anyBusy{ false };
 	for (std::shared_ptr<StatusConsumer<T>> member : members)
@@ -137,7 +135,7 @@ bool StatusQueue<T>::isDone() const
 }
 
 template<typename T>
-bool StatusQueue<T>::isEmpty() const
+bool StatusQueue<T>::isEmpty()
 {
 	return !size;
 }
@@ -145,13 +143,9 @@ bool StatusQueue<T>::isEmpty() const
 template<typename T>
 void StatusQueue<T>::refreshSize()
 {
+	mutex.lock();
 	size = this->queue.size();
-}
-
-template<typename T>
-std::shared_ptr<StatusConsumer<T>> StatusQueue<T>::getMember(size_t i) const
-{
-	return members[i];
+	mutex.unlock();
 }
 
 template<typename T>

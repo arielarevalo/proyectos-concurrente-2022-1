@@ -9,6 +9,7 @@
 
 #include "./GameState.hpp"
 #include "./PlayState.hpp"
+#include "logger/Logger.hpp"
 
 /**
  * Work Unit
