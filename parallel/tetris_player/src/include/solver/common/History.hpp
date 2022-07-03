@@ -10,6 +10,9 @@
 #include "./GameState.hpp"
 #include "./PlayState.hpp"
 
+/**
+ * Work Unit
+ */
 class History
 {
 public:
@@ -38,6 +41,8 @@ public:
 	void setState(size_t nextRotation, size_t nextColumn);
 
 	void push(const std::shared_ptr<PlayState>& playState);
+
+	std::shared_ptr<PlayState> pop();
 
 	const std::shared_ptr<PlayState>& getLast() const;
 
@@ -96,7 +101,7 @@ bool History::place()
 	 * 	nextTetrimino{ getNextTetrimino() }
 	 * 	return getLast().place ( nextRot, nextCol, nextTetrimino )
 	 */
-	 return false;
+	return false;
 }
 
 void History::setState(size_t nextRotation, size_t nextColumn)
@@ -137,4 +142,10 @@ void History::setDone()
 bool History::isEmpty() const
 {
 	return value.empty();
+}
+std::shared_ptr<PlayState> History::pop()
+{
+	std::shared_ptr<PlayState> out{ value.front() };
+	value.pop();
+	return out;
 }
