@@ -10,109 +10,120 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <queue>
 
 #include "./concurrent/StatusAssembler.hpp"
 #include "./concurrent/StatusQueue.hpp"
 #include "./common/History.hpp"
 #include "./logger/Logger.hpp"
 
-class Solver
-{
+class Solver {
 public:
-	static History processGameState(const GameState& gameState);
+    static History processGameState(const GameState &gameState);
+
 private:
-	class TAssembler : public StatusAssembler<History>
-	{
-	public:
-		using StatusAssembler::StatusAssembler;
+    static std::unique_ptr<History> highScore;
 
-		/**
-		 * Task to run in thread. Consumes forever until stop condition.
-		 * @return Exit code.
-		 */
-		int run() override;
+    static void compare(History &current);
 
-		/**
-		 * Consumes each element in the queue. Handles each History object by
-		 * placing the latest permutation and either permuting or comparing
-		 * the resulting History object.
-		 * @param History History object to be consumed.
-		 */
-		void consume(History History) override;
+    class TAssembler : public StatusAssembler<History> {
+    public:
+        using StatusAssembler::StatusAssembler;
 
-		/**
-		 * Produces each element in the queue. Handles each outgoing History
-		 * object by pushing the updated History object to the queue if it is
-		 * not done being assembled.
-		 * @param history
-		 */
-		void produce(const History& history) override;
-	};
+        /**
+         * Task to run in thread. Consumes forever until stop condition.
+         * @return Exit code.
+         */
+        int run() override;
+
+        /**
+         * Consumes each element in the queue. Handles each History object by
+         * placing the latest permutation and either permuting or comparing
+         * the resulting History object.
+         * @param History History object to be consumed.
+         */
+        void consume(History History) override;
+
+        /**
+         * Produces each element in the queue. Handles each outgoing History
+         * object by pushing the updated History object to the queue if it is
+         * not done being assembled.
+         * @param history
+         */
+        void produce(const History &history) override;
+    };
 };
 
-History Solver::processGameState(const GameState& gameState)
-{
-	long numAssemblers{ sysconf(_SC_NPROCESSORS_ONLN) };
+History Solver::processGameState(const GameState &gameState) {
+    long numAssemblers{sysconf(_SC_NPROCESSORS_ONLN)};
 
-	History highScore{ gameState };
-	History stopCondition{ gameState };
-	std::shared_ptr<StatusQueue<History>> statusQueue;
+    highScore = std::make_unique<History>(gameState);
 
-	for (int a{ 0 }; a < numAssemblers; ++a)
-	{
-		std::shared_ptr<TAssembler> assembler
-				{ std::make_shared<TAssembler>(stopCondition) };
-		statusQueue = StatusQueue<History>::signUp(assembler);
-	}
+    History highScore{gameState};
+    History stopCondition{gameState};
+    std::shared_ptr<StatusQueue<History>> statusQueue;
 
-	History initialState{ gameState };
-	initialState.push(std::make_shared<PlayState>(gameState));
+    for (int a{0}; a < numAssemblers; ++a) {
+        std::shared_ptr<TAssembler> assembler
+                {std::make_shared<TAssembler>(stopCondition)};
+        statusQueue = StatusQueue<History>::signUp(assembler);
+    }
 
-	statusQueue->startConsumers();
+    History initialState{gameState};
+    initialState.push(std::make_shared<PlayState>(gameState));
 
-	Logger::info("Waiting for assemblers to finish.");
+    statusQueue->startConsumers();
 
-	statusQueue->waitForConsumers();
+    Logger::info("Waiting for assemblers to finish.");
 
-	if (!highScore.isEmpty())
-	{
-		return highScore;
-	}
-	else
-	{
-		throw std::domain_error("No valid moves down to requested depth.");
-	}
+    statusQueue->waitForConsumers();
+
+    if (!highScore.isEmpty()) {
+        return highScore;
+    } else {
+        throw std::domain_error("No valid moves down to requested depth.");
+    }
 }
 
-int Solver::TAssembler::run()
-{
-	this->consumeForever();
+int Solver::TAssembler::run() {
+    this->consumeForever();
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
-void Solver::TAssembler::consume(History history)
-{
-//	 * * history.getLast() conseguir el ultimo elemento
-//	 * * hacer place (sobreescribir) sobre el último con los datos aux.
-//	 * * si el place es exitoso
-//	 * 		* si el getSize de history es igual a prof máx + 1
-//	 * 				* Compare
-//	 * 				* History.setDone()
-					StatusAssembler<History>::consume(history);
-//	 * 		* si no
-//	 * 				* "Permutar" el último
-//	 *				* for loop (each queue<history>)
-					StatusAssembler<History>::consume(history);
-//	 *				* END FOR
-//	 *
-//	 * * si no
-//	 * 		* History.setDone()
-			StatusAssembler<History>::consume(history);
+// Test THIS!!!!
+void Solver::compare(History &current) {
+    if (highScore->isEmpty()) {
+        highScore = std::make_unique<History>(current);
+    } else if (current.getLast() > highScore->getLast()) {
+        highScore = std::make_unique<History>(current);
+    }
 }
 
-void Solver::TAssembler::produce(const History& history)
-{
-	// * si !History.isDone()
-	Producer::produce(history);
+void Solver::TAssembler::consume(History history) {
+    if (history.place()) {
+
+        if (history.reviewCurrentDepth()) {
+            compare(history);
+            history.setDone();
+            StatusAssembler<History>::consume(history);
+        } else {
+            std::queue<History> histories{history.permutate()};
+
+            while (!histories.empty()) {
+                StatusAssembler<History>::consume(histories.front());
+                histories.pop();
+            }
+        }
+    } else {
+        history.setDone();
+        StatusAssembler<History>::consume(history);
+    }
+}
+
+void Solver::TAssembler::produce(const History &history) {
+    // * si !History.isDone()
+    if (!history.isDone()) {
+        Producer::produce(history);
+    }
 }
