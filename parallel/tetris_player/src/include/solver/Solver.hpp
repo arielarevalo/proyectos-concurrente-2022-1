@@ -10,6 +10,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <queue>
 
 #include "./concurrent/StatusAssembler.hpp"
 #include "./concurrent/StatusQueue.hpp"
@@ -19,7 +20,8 @@
 class Solver
 {
 public:
-	static History processGameState(const GameState& gameState);
+	static History solve(const GameState& gameState);
+
 private:
 	class TAssembler : public StatusAssembler<History>
 	{
@@ -48,13 +50,18 @@ private:
 		 */
 		void produce(const History& history) override;
 	};
+
+	static void compare(History& current);
+
+	static std::unique_ptr<History> highScore;
 };
 
-History Solver::processGameState(const GameState& gameState)
+History Solver::solve(const GameState& gameState)
 {
 	long numAssemblers{ sysconf(_SC_NPROCESSORS_ONLN) };
 
-	History highScore{ gameState };
+	highScore = std::make_unique<History>(gameState);
+
 	History stopCondition{ gameState };
 	std::shared_ptr<StatusQueue<History>> statusQueue;
 
@@ -70,14 +77,11 @@ History Solver::processGameState(const GameState& gameState)
 
 	statusQueue->startConsumers();
 
-	Logger::info("Waiting for assemblers to finish.");
-
 	statusQueue->waitForConsumers();
 
-	if (!highScore.isEmpty())
+	if (!highScore->isEmpty())
 	{
-		Logger::info("Successfully found best moves for game state.");
-		return highScore;
+		return *highScore;
 	}
 	else
 	{
@@ -92,28 +96,53 @@ int Solver::TAssembler::run()
 	return EXIT_SUCCESS;
 }
 
+// Test THIS!!!!
+void Solver::compare(History& current)
+{
+	if (highScore->isEmpty())
+	{
+		highScore = std::make_unique<History>(current);
+	}
+	else if (current.getLast() > highScore->getLast())
+	{
+		highScore = std::make_unique<History>(current);
+	}
+}
+
 void Solver::TAssembler::consume(History history)
 {
-//	 * * history.getLast() conseguir el ultimo elemento
-//	 * * hacer place (sobreescribir) sobre el último con los datos aux.
-//	 * * si el place es exitoso
-//	 * 		* si el getSize de history es igual a prof máx + 1
-//	 * 				* Compare
-//	 * 				* History.setDone()
-					StatusAssembler<History>::consume(history);
-//	 * 		* si no
-//	 * 				* "Permutar" el último
-//	 *				* for loop (each queue<history>)
-					StatusAssembler<History>::consume(history);
-//	 *				* END FOR
-//	 *
-//	 * * si no
-//	 * 		* History.setDone()
+	if (history.place())
+	{
+
+		if (history.reviewCurrentDepth())
+		{
+			compare(history);
+			history.setDone();
 			StatusAssembler<History>::consume(history);
+		}
+		else
+		{
+			std::queue<History> histories{ history.permutate() };
+
+			while (!histories.empty())
+			{
+				StatusAssembler<History>::consume(histories.front());
+				histories.pop();
+			}
+		}
+	}
+	else
+	{
+		history.setDone();
+		StatusAssembler<History>::consume(history);
+	}
 }
 
 void Solver::TAssembler::produce(const History& history)
 {
 	// * si !History.isDone()
-	Producer::produce(history);
+	if (!history.isDone())
+	{
+		Producer::produce(history);
+	}
 }

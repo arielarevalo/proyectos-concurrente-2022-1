@@ -27,7 +27,7 @@ void TetrisPlayer::start()
 
 	FileWatcher fw{ Filer::INITIAL_PATH, Filer::TARGET, Filer::END_TARGET };
 
-	Logger::info("Starting file watching loop.");
+	Logger::info("Starting file watch loop.");
 	while (true)
 	{
 		std::string path{ fw.watch() };
@@ -35,12 +35,14 @@ void TetrisPlayer::start()
 		if (path == std::string{ Filer::INITIAL_PATH }
 				+ std::string{ Filer::END_TARGET })
 		{
-			Logger::info("Finalizing.");
-			exit(0);
+			Logger::info("Successfully found stop file. Finalizing.");
+			return;
 		}
 
 		if (!path.empty())
 		{
+			Logger::info("Successfully found tetris game state file.");
+
 			std::ifstream file{ path };
 
 			file.exceptions(
@@ -52,9 +54,12 @@ void TetrisPlayer::start()
 				Logger::info("Successfully read initial game state from file.");
 
 				Logger::setStart();
-				History highScore{ Solver::processGameState(gameState) };
+				Logger::info("Finding best moves for game state.");
+				History highScore{ Solver::solve(gameState) };
+				Logger::info("Successfully found best moves for game state.");
 
 				Filer::write(highScore);
+				Logger::info("Successfully wrote best moves to files.");
 			}
 			catch (const std::invalid_argument&)
 			{
