@@ -105,7 +105,9 @@ std::queue<History> History::permutate() const
 			history.nextRotation = r;
 			history.nextColumn = c;
 			history.push(std::make_shared<PlayState>(*last));
-			histories.push(history);
+			if(history.place()) {
+				histories.push(history);
+			}
 		}
 	}
 	return histories;

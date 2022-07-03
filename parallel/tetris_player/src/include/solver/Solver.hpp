@@ -97,20 +97,17 @@ int Solver::TAssembler::run()
 
 void Solver::TAssembler::consume(History history)
 {
-	if (history.place())
+	if (history.isMaxDepth())
 	{
-		if (history.isMaxDepth())
+		compare(history);
+	}
+	else
+	{
+		std::queue<History> histories{ history.permutate() };
+		while (!histories.empty())
 		{
-			compare(history);
-		}
-		else
-		{
-			std::queue<History> histories{ history.permutate() };
-			while (!histories.empty())
-			{
-				produce(histories.front());
-				histories.pop();
-			}
+			produce(histories.front());
+			histories.pop();
 		}
 	}
 }
