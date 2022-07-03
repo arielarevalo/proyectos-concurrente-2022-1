@@ -9,9 +9,9 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
-#include "../common/GameState.hpp"
-#include "../logger/Logger.hpp"
-#include "../common/PlayState.hpp"
+#include "./solver/common/GameState.hpp"
+#include "./solver/common/History.hpp"
+#include "./solver/common/PlayState.hpp"
 
 /**
  * @brief Reads input file to game state and writes to output file with
@@ -20,6 +20,15 @@
 class Filer
 {
 public:
+	static constexpr char INITIAL_PATH[7]{ "./put/" };
+	static constexpr char TARGET[17]{ "tetris_state.txt" };
+	static constexpr char END_TARGET[15]{ "tetris_end.txt" };
+
+	/**
+	 * Sets working directory to its initial state.
+	 */
+	static void initialize();
+
 	/**
 	 * @brief Reads input file into a new game state.
 	 * @param file File to read from.
@@ -31,11 +40,14 @@ public:
 	 * @brief Writes history of best play states into output files.
 	 * @param history List of ancestors of best play state.
 	 */
-	static void write(std::vector<PlayState> history);
-
-private:
-	static constexpr char INITIAL_PATH[7]{ "./put/" };
+	static void write(History& history);
 };
+
+void Filer::initialize()
+{
+	std::filesystem::remove_all(INITIAL_PATH);
+	std::filesystem::create_directory(INITIAL_PATH);
+}
 
 GameState Filer::read(std::ifstream& file)
 {
@@ -86,28 +98,28 @@ GameState Filer::read(std::ifstream& file)
 	return { id, depth, playArea, nextTetriminos };
 }
 
-void Filer::write(std::vector<PlayState> history)
+void Filer::write(History& history)
 {
-	std::filesystem::remove_all(INITIAL_PATH);
-	std::filesystem::create_directory(INITIAL_PATH);
+	initialize();
 
-	const size_t initialSize{ history.size() };
+	const size_t initialSize{ history.getSize() };
 	for (size_t i{ 0 }; i < initialSize; ++i)
 	{
 		std::string filename{ "../bin/put/tetris_play_"
 									  + std::to_string(i)
 									  + ".txt" };
 
-		PlayState current{ history.back() };
+		PlayState current{ *history.pop() };
 
-		std::ofstream file{filename};
+		std::ofstream file{ filename };
 		file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
 
 		file << current.getId() << std::endl;
 		file << current.getLastTetrimino() << std::endl;
 		file << current.getLastRotation() << std::endl;
 		current.getPlayArea().print(file);
-
-		history.pop_back();
 	}
+
+	std::filesystem::remove(
+			std::string{ INITIAL_PATH } + std::string{ TARGET });
 }

@@ -48,7 +48,7 @@ public:
 	virtual void consume(DataType data) = 0;
 
 protected:
-	/// This data will be used to represent that the Consumer must stop the
+	/// This data will be used to represent that the TConsumer must stop the
 	/// consumption, and finish its work. It is used for cleaning purposes.
 	const DataType stopCondition;
 	/// True if this consumer owns the queue and it must be deleted in destructor

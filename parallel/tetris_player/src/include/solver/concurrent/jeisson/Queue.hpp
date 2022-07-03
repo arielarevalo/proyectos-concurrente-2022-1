@@ -51,6 +51,7 @@ void Queue<DataType>::push(const DataType& data)
 	this->mutex.unlock();
 	this->canConsume.signal();
 }
+
 template<typename DataType>
 DataType Queue<DataType>::pop()
 {
