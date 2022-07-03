@@ -36,6 +36,11 @@
     * Al terminar con un nivel, comparar cada combinación resultante, y retornar
       la de puntaje máximo.
 
+* Paralelizar el programa para que haga un uso equilibrado de los recursos de la máquina.
+  * Utilizar el patrón Productor-Consumidor
+  * Productor coloca estados de Tetris en una cola y cada consumidor utiliza un Solucionador de Tetris.
+  * Un consumidor toma una unidad de trabajo, inicia el solucionador y, una vez resuelto, vuelve a buscar otra unidad de trabajo en la cola
+
 * Utilizar una heurística existente de las indicadas, y dar crédito, para
   determinar un "puntaje máximo".
 
@@ -63,15 +68,24 @@ procediente escritura como archivos en el directorio de entrada. En cuanto al
 funcionamiento del `TetrisSolverSerial`, propósito de cada una de sus partes
 respecto a los requisitos es el siguiente:
 
-| Clase     | Propósito                                                                                                                                                 |
-|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Filer     | Validación de entradas. Conversión de archivo a `InState` y de `PlayState` a archivo.                                                                     |
-| Scorer    | Navega las permutaciones de los `PlayState` y puntúa cada `PlayState.playArea`.                                                                           |
-| GameState | Contiene la información inicial del estado de juego.                                                                                                      |
-| PlayState | Contiene la información de estado de una jugada.                                                                                                          |
-| Tetrimino | Contiene la forma de un tetrimino como una matriz de caracteres.                                                                                          |
-| Matrix    | Contiene la forma de una area de juego como una matriz de caracteres.                                                                                     |
-
+| Clase           | Propósito                                                                             |
+|-----------------|---------------------------------------------------------------------------------------|
+| GameState       | Contiene la información inicial del estado de juego.                                  |
+| History         | Contiene la estructura de la unidad de trabajo.                                       |
+| Matrix          | Contiene la forma de una area de juego como una matriz de caracteres.                 |
+| PlayState       | Contiene la información de estado de una jugada.                                      |
+| Tetrimino       | Contiene la forma de un tetrimino como una matriz de caracteres.                      |
+| Manager         | Procesar estado de tetris de manera concurrente con el patron Productor - consumidor. |
+| StatusConsumer  | Implementacion del Consumer y procesar una unidad de trabajo.                         |
+| StatusAssembler | Implementacion del Assembler.                                                         |
+| StatusProducer  | Implementacion del Producer y coloca unidades de trabajo a la cola.                   |
+| StatusQueue     | Manejo las unidades de trabajo en la cola.                                            |
+| FileEditor      | Validación de entradas. Conversión de archivo a `InState` y de `PlayState` a archivo. |
+| FileWatcher     | Monitorea los cambios en el fichero e informa esos cambios al programa.               |
+| Logger          | Gestionar mensajes del estado del programa.                                           |
+| Comparator      | Navega las permutaciones de los `PlayState` y puntúa cada `PlayState.playArea`.       |
+| Permutator      | Generar las unidades de trabajo.                                                      |
+| Solver          | Resolver una jugada de tetris.                                                        |
 ### FileWatcher
 
 El `FileWatcher` corre con la función `start()`, punto a partir del cual
@@ -80,9 +94,9 @@ carpeta `./bin/put` será detectado a través de la biblioteca `inotify` de
 Linux, y será enviado a procesar con el `TetrisSolverSerial`. Una vez que el
 archivo sea procesado, se borra.
 
-### Filer
+### FileEditor
 
-El algoritmo de `filer` consiste en la lectura y escritura de los contenidos de
+El algoritmo de `FileEditor` consiste en la lectura y escritura de los contenidos de
 un archivo por líneas. En el caso de lectura, las líneas son respectivamente
 convertidas en las variables de un `GameState` para la construcción del
 mismo. Esto se lleva a cabo a través de un número de ejecuciones de `cin`
@@ -90,6 +104,16 @@ basado en la especificación del archivo de entrada y el número de filas del
 área de juego ASCII contenida en el mismo. Además, para el caso de escritura, se
 lleva a cabo la necesaria funcionalidad de conversión de `PlayState` a
 archivo a través de un proceso idéntico, pero inverso, al de lectura.
+
+### código prodcons
+
+Nuestra solución utiliza el código brindado por el profesor para facilitar la implementación de esta entrega.
+el equipo tomó la decisión de realizar implementaciones de las siguientes clases: Queue, Producer, Consumer 
+y Assembler.
+
+### Solver
+El algoritmo `Manager.proccessTetrisState(gameState)` es el punto de inicio en la solucion concurrente,
+se encarga de procesar un GameState con el patron Productor - consumidor
 
 ### Play State
 
@@ -139,6 +163,14 @@ caso se agrega el estado de nivel actual al arreglo `history`.
 
 ### Diagramas
 
+#### Version Serial
 ![Diagrama a nivel de main](diagram.svg)
 
 ![Flow Chart a nivel de main](flowchart.svg)
+
+#### Version Concurrente
+![Diagrama a nivel de main](diagram2.svg)
+
+![figures](http://jocan3.com/misc_images/tetris_prod_cons_diagram.png)
+
+![Flow Chart a nivel de main](flowchart2.svg)

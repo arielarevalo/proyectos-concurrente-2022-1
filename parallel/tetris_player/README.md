@@ -100,7 +100,8 @@ I
 ```
 
 El programa seguirá corriendo hasta recibir una señal de interrupción 
-(SIGINT), la cual se puede emitir haciendo `Ctrl + C` en el teclado.
+la cuál consiste en que el File watcher lea un archivo con el nombre 
+tetris_end.txt.
 
 ## [Diseño](./design/README.md)
 
