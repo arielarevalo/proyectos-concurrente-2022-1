@@ -55,10 +55,10 @@ void TetrisPlayer::start()
 
 				Logger::setStart();
 				Logger::info("Finding best moves for game state.");
-				History highScore{ Solver::solve(gameState) };
+				//History highScore{ Solver::solve(gameState) };
 				Logger::info("Successfully found best moves for game state.");
 
-				Filer::write(highScore);
+				//Filer::write(highScore);
 				Logger::info("Successfully wrote best moves to files.");
 			}
 			catch (const std::invalid_argument&)

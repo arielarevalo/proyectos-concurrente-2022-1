@@ -145,13 +145,6 @@ bool Solver::compareToBest(const PlayState& current)
 
 		if (currentScore > topScore)
 		{
-			Logger::info("New High Score:");
-			std::cout << "\t" << currentScore << std::endl;
-			current.getPlayArea().print();
-			Logger::info("Old High Score:");
-			std::cout << "\t" << topScore << std::endl;
-			history.front().getPlayArea().print();
-
 			history.clear();
 			history.push_back(current);
 			isHighScore = true;

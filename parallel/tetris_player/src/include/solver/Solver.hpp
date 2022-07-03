@@ -13,16 +13,16 @@
 
 #include "./concurrent/StatusAssembler.hpp"
 #include "./concurrent/StatusQueue.hpp"
-#include "./common/History.hpp"
+#include "./common/WorkState.hpp"
 #include "./logger/Logger.hpp"
 
 class Solver
 {
 public:
-	static History solve(const GameState& gameState);
+	static std::queue<PlayState> solve(const GameState& gameState);
 
 private:
-	class TAssembler : public StatusAssembler<History>
+	class TAssembler : public StatusAssembler<WorkState>
 	{
 	public:
 		using StatusAssembler::StatusAssembler;
@@ -34,53 +34,56 @@ private:
 		int run() override;
 
 		/**
-		 * Consumes each element in the queue. Handles each History object by
+		 * Consumes each element in the queue. Handles each WorkState object by
 		 * placing the latest permutation and either permuting or comparing
-		 * the resulting History object.
-		 * @param History History object to be consumed.
+		 * the resulting WorkState object.
+		 * @param WorkState WorkState object to be consumed.
 		 */
-		void consume(History History) override;
+		void consume(WorkState WorkState) override;
 	};
 
-	static void compare(History& current);
+	static void compare(WorkState& current);
 
-	static std::unique_ptr<History> highScore;
+	static std::unique_ptr<WorkState> highScore;
 
 	static std::mutex mutex;
 };
 
-std::unique_ptr<History> Solver::highScore{};
+std::unique_ptr<WorkState> Solver::highScore{};
 
 std::mutex Solver::mutex{};
 
-History Solver::solve(const GameState& gameState)
+std::queue<PlayState> Solver::solve(const GameState& gameState)
 {
 	long numAssemblers{ sysconf(_SC_NPROCESSORS_ONLN) };
 
-	highScore = std::make_unique<History>(gameState);
+	WorkState stopParent{ gameState };
+	WorkState stopCondition{ stopParent };
 
-	History stopCondition{ gameState, true };
-
-	std::shared_ptr<StatusQueue<History>> statusQueue;
+	std::shared_ptr<StatusQueue<WorkState>> statusQueue;
 
 	for (int a{ 0 }; a < numAssemblers; ++a)
 	{
 		std::shared_ptr<TAssembler> assembler
 				{ std::make_shared<TAssembler>(stopCondition) };
-		statusQueue = StatusQueue<History>::signUp(assembler);
+		statusQueue = StatusQueue<WorkState>::signUp(assembler);
 	}
 
-	History initialState{ gameState };
+	WorkState initialState{ gameState };
 	statusQueue->push(initialState);
+
 	statusQueue->refreshSize();
 
 	statusQueue->startConsumers();
 
 	statusQueue->waitForConsumers();
 
-	if (!highScore->isEmpty())
+	if (highScore)
 	{
-		return *highScore;
+		std::queue<PlayState> history{};
+		// TODO(aarevalo): ir llenando esa mica con los playstates y cada parent
+		return history;
+
 	}
 	else
 	{
@@ -95,29 +98,53 @@ int Solver::TAssembler::run()
 	return EXIT_SUCCESS;
 }
 
-void Solver::TAssembler::consume(History history)
+// Recibo un estado de juego
+// Intento hacer place en la ubicacion prescrita
+// Rec: Si tengo exito, bajo un nivel, e intento en la primera ubicacion
+// //	Si llego al último nivel, hago compare
+// // //	Si el compare es exitoso, reemplazo el highScore
+// // //	Si no, reviso si hay ubicaciones en este nivel
+// // // //		Si hay, prescribo la proxima ubicacion (Produce)
+// // // //		Si no, subo un nivel y prescribo la proxima ubicacion (Produce)
+// //	Si no (no exito), reviso si hay ubicaciones en este nivel
+// // //	Si hay, prescribo la proxima ubicacion (Produce)
+// // //	Si no, subo un nivel y prescribo la proxima ubicacion (Produce)
+
+void Solver::TAssembler::consume(WorkState workState)
 {
-	if (history.isMaxDepth())
+	if (workState.place())
 	{
-		compare(history);
+		// Falta revisar si la profundidad ya
+		WorkState child{ std::make_shared<WorkState>(workState) };
+		consume(child);
 	}
 	else
 	{
-		std::queue<History> histories{ history.permutate() };
+		// como hallo el proximo WorkState que voy a mandar a Produce?
+	}
+
+	/*if (workState.isMaxDepth())
+	{
+		compare(workState);
+	}
+	else
+	{
+		std::queue<WorkState> histories{ workState.permutate() };
 		while (!histories.empty())
 		{
 			produce(histories.front());
 			histories.pop();
 		}
-	}
+	}*/
 }
 
-void Solver::compare(History& current)
+/*
+void Solver::compare(WorkState& current)
 {
 	mutex.lock();
 	if (highScore->isEmpty() || *current.getLast() > *highScore->getLast())
 	{
-		highScore = std::make_unique<History>(current);
+		highScore = std::make_unique<WorkState>(current);
 	}
 	mutex.unlock();
-}
+}*/
