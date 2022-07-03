@@ -1,14 +1,13 @@
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>
 // Copyright 2022 Pablo Madrigal Ramirez <pablo.madrigalramirez@ucr.ac.cr>
 
-// TODO(aarevalo): No repetir los errores de nuestros antepasados (memoria estática)
-
 #pragma once
 
 #include <unistd.h>
 #include <cstddef>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <vector>
 #include <queue>
 
@@ -41,20 +40,18 @@ private:
 		 * @param History History object to be consumed.
 		 */
 		void consume(History History) override;
-
-		/**
-		 * Produces each element in the queue. Handles each outgoing History
-		 * object by pushing the updated History object to the queue if it is
-		 * not done being assembled.
-		 * @param history
-		 */
-		void produce(const History& history) override;
 	};
 
 	static void compare(History& current);
 
 	static std::unique_ptr<History> highScore;
+
+	static std::mutex mutex;
 };
+
+std::unique_ptr<History> Solver::highScore{};
+
+std::mutex Solver::mutex{};
 
 History Solver::solve(const GameState& gameState)
 {
@@ -62,7 +59,8 @@ History Solver::solve(const GameState& gameState)
 
 	highScore = std::make_unique<History>(gameState);
 
-	History stopCondition{ gameState };
+	History stopCondition{ gameState, true };
+
 	std::shared_ptr<StatusQueue<History>> statusQueue;
 
 	for (int a{ 0 }; a < numAssemblers; ++a)
@@ -73,7 +71,8 @@ History Solver::solve(const GameState& gameState)
 	}
 
 	History initialState{ gameState };
-	initialState.push(std::make_shared<PlayState>(gameState));
+	statusQueue->push(initialState);
+	statusQueue->refreshSize();
 
 	statusQueue->startConsumers();
 
@@ -96,53 +95,31 @@ int Solver::TAssembler::run()
 	return EXIT_SUCCESS;
 }
 
-// Test THIS!!!!
-void Solver::compare(History& current)
-{
-	if (highScore->isEmpty())
-	{
-		highScore = std::make_unique<History>(current);
-	}
-	else if (current.getLast() > highScore->getLast())
-	{
-		highScore = std::make_unique<History>(current);
-	}
-}
-
 void Solver::TAssembler::consume(History history)
 {
 	if (history.place())
 	{
-
-		if (history.reviewCurrentDepth())
+		if (history.isMaxDepth())
 		{
 			compare(history);
-			history.setDone();
-			StatusAssembler<History>::consume(history);
 		}
 		else
 		{
 			std::queue<History> histories{ history.permutate() };
-
 			while (!histories.empty())
 			{
-				StatusAssembler<History>::consume(histories.front());
+				produce(histories.front());
 				histories.pop();
 			}
 		}
 	}
-	else
-	{
-		history.setDone();
-		StatusAssembler<History>::consume(history);
-	}
 }
 
-void Solver::TAssembler::produce(const History& history)
+void Solver::compare(History& current)
 {
-	// * si !History.isDone()
-	if (!history.isDone())
+	std::scoped_lock<std::mutex> lock{ mutex };
+	if (highScore->isEmpty() || *current.getLast() > *highScore->getLast())
 	{
-		Producer::produce(history);
+		highScore = std::make_unique<History>(current);
 	}
 }

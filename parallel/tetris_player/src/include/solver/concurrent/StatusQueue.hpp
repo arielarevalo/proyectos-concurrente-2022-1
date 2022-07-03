@@ -45,8 +45,6 @@ public:
 
 	bool isEmpty() const;
 
-	size_t getSize() const;
-
 private:
 	static std::shared_ptr<StatusQueue<T>> statusQueue;
 
@@ -69,6 +67,7 @@ std::shared_ptr<StatusQueue<T>> StatusQueue<T>::statusQueue{};
 template<typename T>
 void StatusQueue<T>::startConsumers() const
 {
+	assert(!queue.empty());
 	for(std::shared_ptr<StatusConsumer<T>> member : members) {
 		member->startThread();
 	}
@@ -97,6 +96,7 @@ StatusQueue<T>::signUp(std::shared_ptr<StatusConsumer<T>> sa)
 			statusQueue = newStatusQueue;
 		}
 		statusQueue->members.emplace_back(sa);
+		sa->setConsumingQueue(statusQueue);
 	}
 	return statusQueue;
 }
@@ -104,20 +104,20 @@ StatusQueue<T>::signUp(std::shared_ptr<StatusConsumer<T>> sa)
 template<typename T>
 void StatusQueue<T>::push(const T& data)
 {
-	this->mutex.lock();
-	this->queue.push(data);
-	this->mutex.unlock();
-	this->canConsume.signal();
+	mutex.lock();
+	queue.push(data);
+	mutex.unlock();
+	canConsume.signal();
 }
 
 template<typename T>
 T StatusQueue<T>::pop()
 {
-	this->canConsume.wait();
-	this->mutex.lock();
-	T result = this->queue.front();
-	this->queue.pop();
-	this->mutex.unlock();
+	canConsume.wait();
+	mutex.lock();
+	T result = queue.front();
+	queue.pop();
+	mutex.unlock();
 	return result;
 }
 
@@ -140,12 +140,6 @@ template<typename T>
 bool StatusQueue<T>::isEmpty() const
 {
 	return !size;
-}
-
-template<typename T>
-size_t StatusQueue<T>::getSize() const
-{
-	return size;
 }
 
 template<typename T>

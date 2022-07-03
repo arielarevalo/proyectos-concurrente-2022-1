@@ -16,118 +16,143 @@
 class History
 {
 public:
-    explicit History(const GameState &gameState)
-            : gameState(gameState) {
-    }
+	explicit History(const GameState& gameState)
+			:gameState(gameState)
+	{
+	}
 
-    bool operator==(const History &other) const;
+	History(const GameState& gameState, bool isStopCondition);
 
-    /**
-     * @brief Determines children of a given parent play state and calls
-     * ::findBestMoves on each of them.
-     * @param parent Parent play state currently being solved.
-     * @param parentDepth Parent solution depth.
-     * @return Whether a high score was found in children.
-     */
-    std::queue<History> permutate();
+	bool operator==(const History& other) const;
 
-    /**
-     *
-     * @return
-     */
-    bool place();
+	/**
+	 * @brief Determines children of a given parent play state and calls
+	 * ::findBestMoves on each of them.
+	 * @param parent Parent play state currently being solved.
+	 * @param parentDepth Parent solution depth.
+	 * @return Whether a high score was found in children.
+	 */
+	std::queue<History> permutate() const;
 
-    void setState(size_t nextRotation, size_t nextColumn);
+	/**
+	 *
+	 * @return
+	 */
+	bool place() const;
 
-    void push(const std::shared_ptr<PlayState> &playState);
+	void push(const std::shared_ptr<PlayState>& playState);
 
 	std::shared_ptr<PlayState> pop();
 
-    bool reviewCurrentDepth() const;
+	bool isMaxDepth() const;
 
-    const std::shared_ptr<PlayState> &getLast() const;
+	std::shared_ptr<PlayState> getLast() const;
 
-    size_t getSize() const;
+	size_t getSize() const;
 
-    bool isDone() const;
-
-    void setDone();
-
-    bool isEmpty() const;
+	bool isEmpty() const;
 
 private:
-    Tetrimino::Figure getNextTetrimino() const;
+	Tetrimino::Figure getNextTetrimino() const;
 
-    const GameState &gameState;
+	Tetrimino::Figure getLastTetrimino() const;
 
-    size_t nextRotation{0};
+	const GameState& gameState;
 
-    size_t nextColumn{0};
+	size_t nextRotation{ 0 };
 
-    bool done{false};
+	size_t nextColumn{ 0 };
 
-    std::queue<std::shared_ptr<PlayState>> value{};
+	std::queue<std::shared_ptr<PlayState>> value{};
 };
 
-bool History::operator==(const History &other) const {
-    return this->value == other.value;
+History::History(const GameState& gameState, bool isStopCondition)
+		:gameState(gameState)
+{
+	if (isStopCondition)
+	{
+		while (!isMaxDepth())
+		{
+			push(std::make_shared<PlayState>(gameState));
+		}
+		push(std::make_shared<PlayState>(gameState));
+	}
 }
 
-std::queue<History> History::permutate() {
-    push(getLast());
-
-    size_t rotations{
-            Tetrimino::getTetriminoRotations(getNextTetrimino())
-    };
-
-    std::queue<History> histories{};
-
-    for (size_t r{0}; r < rotations; ++r) {
-        for (size_t c{0}; c < getLast()->getPlayArea().cols; ++c) {
-            nextRotation = r;
-            nextColumn = c;
-            histories.push(*this);
-        }
-    }
-    return histories;
+bool History::operator==(const History& other) const
+{
+	return (this->gameState == other.gameState)
+			&& (this->value == other.value)
+			&& (this->nextRotation == other.nextRotation)
+			&& (this->nextColumn == other.nextColumn);
 }
 
-bool History::place() {
-    Tetrimino::Figure nextTetrimino{getNextTetrimino()};
-    return getLast()->place(nextTetrimino, nextRotation, nextColumn);
+std::queue<History> History::permutate() const
+{
+	const std::shared_ptr<PlayState>& last{ getLast() };
+
+	size_t rotations{
+			Tetrimino::getTetriminoRotations(getNextTetrimino())
+	};
+
+	std::queue<History> histories{};
+
+	for (size_t r{ 0 }; r < rotations; ++r)
+	{
+		for (size_t c{ 0 }; c < last->getPlayArea().cols; ++c)
+		{
+			History history{ *this };
+			history.nextRotation = r;
+			history.nextColumn = c;
+			history.push(std::make_shared<PlayState>(*last));
+			histories.push(history);
+		}
+	}
+	return histories;
 }
 
-void History::setState(size_t nextRotation, size_t nextColumn) {
-    this->nextRotation = nextRotation;
-    this->nextColumn = nextColumn;
+bool History::place() const
+{
+	if (!isEmpty())
+	{
+		Tetrimino::Figure nextTetrimino{ getLastTetrimino() };
+		return getLast()->place(nextTetrimino, nextRotation, nextColumn);
+	}
+	else
+	{
+		return true;
+	}
 }
 
-void History::push(const std::shared_ptr<PlayState> &playState) {
-    value.push(playState);
+void History::push(const std::shared_ptr<PlayState>& playState)
+{
+	value.push(playState);
 }
 
-Tetrimino::Figure History::getNextTetrimino() const {
-    return gameState.nextTetriminos[getSize()];
+Tetrimino::Figure History::getNextTetrimino() const
+{
+	return gameState.nextTetriminos[getSize()];
 }
 
-const std::shared_ptr<PlayState> &History::getLast() const {
-    return value.back();
+Tetrimino::Figure History::getLastTetrimino() const
+{
+	return gameState.nextTetriminos[getSize() - 1];
 }
 
-size_t History::getSize() const {
-    return value.size();
+std::shared_ptr<PlayState> History::getLast() const
+{
+	return value.empty() ? std::make_shared<PlayState>(gameState)
+						 : value.back();
 }
 
-bool History::isDone() const {
-    return done;
+size_t History::getSize() const
+{
+	return value.size();
 }
 
-void History::setDone() {
-    done = true;
-}
-
-bool History::isEmpty() const {
-    return value.empty();
+bool History::isEmpty() const
+{
+	return value.empty();
 }
 std::shared_ptr<PlayState> History::pop()
 {
@@ -136,6 +161,7 @@ std::shared_ptr<PlayState> History::pop()
 	return out;
 }
 
-bool History::reviewCurrentDepth() const {
-    return getSize() == gameState.depth + 1;
+bool History::isMaxDepth() const
+{
+	return getSize() == gameState.depth + 1;
 }
