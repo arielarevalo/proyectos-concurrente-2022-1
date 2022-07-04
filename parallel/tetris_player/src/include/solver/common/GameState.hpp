@@ -15,6 +15,8 @@
 class GameState
 {
 public:
+	GameState() = default;
+
 	/**
 	 * Constructs a game state from its required fields.
 	 * @param id Identifier of the game state.
@@ -34,10 +36,10 @@ public:
 
 	bool operator==(const GameState &other) const;
 
-	const uint64_t id;
-	const size_t depth;
-	const Matrix playArea;
-	const std::vector<Tetrimino::Figure> nextTetriminos;
+	const uint64_t id{0};
+	const size_t depth{0};
+	const Matrix playArea{};
+	const std::vector<Tetrimino::Figure> nextTetriminos{};
 };
 
 bool GameState::operator==(const GameState &other) const {

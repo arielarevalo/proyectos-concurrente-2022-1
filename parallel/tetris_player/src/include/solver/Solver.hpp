@@ -8,6 +8,7 @@
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <utility>
 #include <vector>
 #include <queue>
 
@@ -39,10 +40,19 @@ private:
 		 * the resulting WorkState object.
 		 * @param WorkState WorkState object to be consumed.
 		 */
-		void consume(WorkState WorkState) override;
+		void consume(WorkState current) override;
+
+		/**
+		 *
+		 * @param current
+		 */
+		void produceNext(const WorkState& current);
 	};
 
-	static void compare(WorkState& current);
+	static void initializeQueue(std::shared_ptr<StatusQueue<WorkState>>& queue,
+			const GameState& gameState);
+
+	static void compare(const WorkState& current);
 
 	static std::unique_ptr<WorkState> highScore;
 
@@ -55,22 +65,9 @@ std::mutex Solver::mutex{};
 
 std::queue<PlayState> Solver::solve(const GameState& gameState)
 {
-	long numAssemblers{ sysconf(_SC_NPROCESSORS_ONLN) };
-
-	WorkState stopParent{ gameState };
-	WorkState stopCondition{ stopParent };
-
 	std::shared_ptr<StatusQueue<WorkState>> statusQueue;
 
-	for (int a{ 0 }; a < numAssemblers; ++a)
-	{
-		std::shared_ptr<TAssembler> assembler
-				{ std::make_shared<TAssembler>(stopCondition) };
-		statusQueue = StatusQueue<WorkState>::signUp(assembler);
-	}
-
-	WorkState initialState{ gameState };
-	statusQueue->push(initialState);
+	initializeQueue(statusQueue, gameState);
 
 	statusQueue->refreshSize();
 
@@ -80,14 +77,46 @@ std::queue<PlayState> Solver::solve(const GameState& gameState)
 
 	if (highScore)
 	{
-		std::queue<PlayState> history{};
-		// TODO(aarevalo): ir llenando esa mica con los playstates y cada parent
-		return history;
-
+		return highScore->getPlayStates();
 	}
 	else
 	{
 		throw std::domain_error("No valid moves down to requested depth.");
+	}
+}
+
+void Solver::initializeQueue(std::shared_ptr<StatusQueue<WorkState>>& queue,
+		const GameState& gameState)
+{
+	long numAssemblers{ 1 };
+
+	for (int a{ 0 }; a < numAssemblers; ++a)
+	{
+		std::shared_ptr<TAssembler> assembler
+				{ std::make_shared<TAssembler>(WorkState::stopCondition) };
+		queue = StatusQueue<WorkState>::signUp(assembler);
+	}
+
+	Tetrimino::Figure firstTetrimino{ gameState.nextTetriminos[0] };
+	size_t rotations{ Tetrimino::getTetriminoRotations(firstTetrimino) };
+	size_t columns{ gameState.playArea.cols };
+
+	for (size_t i{ 0 }; i < rotations; ++i)
+	{
+		for (size_t j{ 0 }; j < columns; ++j)
+		{
+			queue->push(WorkState{ gameState, Position{ i, j }});
+		}
+	}
+	queue->refreshSize();
+}
+
+void Solver::compare(const WorkState& current)
+{
+	std::scoped_lock lock{ mutex };
+	if (!highScore || current > *highScore)
+	{
+		highScore = std::make_unique<WorkState>(current);
 	}
 }
 
@@ -98,53 +127,32 @@ int Solver::TAssembler::run()
 	return EXIT_SUCCESS;
 }
 
-// Recibo un estado de juego
-// Intento hacer place en la ubicacion prescrita
-// Rec: Si tengo exito, bajo un nivel, e intento en la primera ubicacion
-// //	Si llego al último nivel, hago compare
-// // //	Si el compare es exitoso, reemplazo el highScore
-// // //	Si no, reviso si hay ubicaciones en este nivel
-// // // //		Si hay, prescribo la proxima ubicacion (Produce)
-// // // //		Si no, subo un nivel y prescribo la proxima ubicacion (Produce)
-// //	Si no (no exito), reviso si hay ubicaciones en este nivel
-// // //	Si hay, prescribo la proxima ubicacion (Produce)
-// // //	Si no, subo un nivel y prescribo la proxima ubicacion (Produce)
-
-void Solver::TAssembler::consume(WorkState workState)
+void Solver::TAssembler::consume(WorkState current)
 {
-	if (workState.place())
+	if (current.place())
 	{
-		// Falta revisar si la profundidad ya
-		WorkState child{ std::make_shared<WorkState>(workState) };
-		consume(child);
-	}
-	else
-	{
-		// como hallo el proximo WorkState que voy a mandar a Produce?
-	}
-
-	/*if (workState.isMaxDepth())
-	{
-		compare(workState);
-	}
-	else
-	{
-		std::queue<WorkState> histories{ workState.permutate() };
-		while (!histories.empty())
+		if (!current.isMaxDepth())
 		{
-			produce(histories.front());
-			histories.pop();
+			WorkState child{ std::make_shared<WorkState>(current) };
+			consume(child);
 		}
-	}*/
+		else
+		{
+			compare(current);
+			produceNext(current);
+		}
+	}
+	else
+	{
+		produceNext(current);
+	}
 }
 
-/*
-void Solver::compare(WorkState& current)
+void Solver::TAssembler::produceNext(const WorkState& current)
 {
-	mutex.lock();
-	if (highScore->isEmpty() || *current.getLast() > *highScore->getLast())
+	WorkState next{ WorkState::getNext(current) };
+	if (!(WorkState::stopCondition == std::as_const(next)))
 	{
-		highScore = std::make_unique<WorkState>(current);
+		produce(next);
 	}
-	mutex.unlock();
-}*/
+}

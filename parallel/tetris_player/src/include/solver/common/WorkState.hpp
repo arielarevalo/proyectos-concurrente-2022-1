@@ -4,9 +4,13 @@
 #pragma once
 
 #include <memory>
+#include <queue>
+#include <utility>
 
 #include "./GameState.hpp"
 #include "./PlayState.hpp"
+
+using Position = std::pair<size_t, size_t>; // { rot, col }
 
 /**
  *
@@ -14,102 +18,157 @@
 class WorkState
 {
 public:
-	/**
-	 *
-	 * @param gameState
-	 */
-	explicit WorkState(const GameState& gameState)
-			:gameState(gameState), playState(gameState)
+	static WorkState getNext(WorkState const& original);
+
+	static const WorkState stopCondition;
+
+	WorkState(const std::shared_ptr<WorkState> parent, Position pos)
+			:WorkState(parent, parent->gameState, parent->playState, pos)
 	{
 	}
 
-	/**
-	 *
-	 * @param parent
-	 */
 	explicit WorkState(const std::shared_ptr<WorkState> parent)
-			:parent(parent), gameState(parent->gameState),
-			 playState(parent->playState), depth(parent->depth + 1)
+			:WorkState(parent, first)
+	{
+	}
+
+	explicit WorkState(const GameState& gameState, Position pos)
+			:gameState(gameState), playState(gameState), pos(pos)
+	{
+	}
+
+	explicit WorkState(const GameState& gameState)
+			:WorkState(gameState, PlayState{ gameState })
 	{
 	}
 
 	bool operator==(const WorkState& other) const;
 
+	bool operator<(const WorkState& other) const;
+
+	bool operator>(const WorkState& other) const;
+
 	bool place();
 
+	bool isMaxDepth() const;
+
+	std::queue<PlayState> getPlayStates() const;
+
 private:
+	static constexpr Position first{ 0, 0 };
+
+	WorkState(const std::shared_ptr<WorkState> parent,
+			const GameState& gameState, const PlayState& playState,
+			Position pos)
+			:parent(parent), gameState(gameState),
+			 playState(playState), depth(parent->depth + 1),
+			 pos(pos)
+	{
+	}
+
+	WorkState(const GameState& gameState, const PlayState& playState)
+			:gameState(gameState), playState(playState)
+	{
+	}
+
+	Position getNextPos() const;
+
+	Tetrimino::Figure getTetrimino() const;
+
 	const std::shared_ptr<WorkState> parent{};
 
 	const GameState& gameState;
 
 	PlayState playState;
 
-	size_t depth{0};
+	size_t depth{ 0 };
 
-	size_t rotation{0};
-
-	size_t column{0};
+	Position pos{ first };
 };
+
+const WorkState WorkState::stopCondition{ GameState{}};
+
+WorkState WorkState::getNext(WorkState const& original)
+{
+	if (original.parent)
+	{
+		Position nextPos{ original.getNextPos() };
+		if (nextPos != first)
+		{
+			return { original.parent, nextPos };
+		}
+		else
+		{
+			return getNext(*original.parent);
+		}
+	}
+	else
+	{
+		return stopCondition;
+	}
+}
+
 
 bool WorkState::operator==(const WorkState& other) const
 {
 	return (this->parent == other.parent)
 			&& (this->gameState == other.gameState)
 			&& (this->depth == other.depth)
-			&& (this->rotation == other.rotation)
-			&& (this->column == other.column);
+			&& (this->pos == other.pos);
+}
+
+bool WorkState::operator<(const WorkState& other) const
+{
+	return this->playState < other.playState;
+}
+
+bool WorkState::operator>(const WorkState& other) const
+{
+	return *this < other;
 }
 
 bool WorkState::place()
 {
-	Tetrimino::Figure nextTetrimino{ gameState.nextTetriminos[depth] };
-		return playState.place(nextTetrimino, rotation, column);
+	return playState.place(getTetrimino(), pos.first, pos.second);
 }
 
-/*
-bool WorkState::work()
+bool WorkState::isMaxDepth() const
 {
-
-	if (currentDepth < finalDepth)
-	{
-		isHighScore = findChildren(current, currentDepth);
-		if (currentDepth > -1 && isHighScore)
-		{
-			history.push_back(current);
-		}
-	}
-	else if (currentDepth == finalDepth)
-	{
-		isHighScore = compareToBest(current);
-	}
-	return isHighScore;
+	return depth == gameState.depth;
 }
 
-bool Solver::findChildren(const PlayState& parent, int parentDepth)
+std::queue<PlayState> WorkState::getPlayStates() const
 {
-	bool isHighScore{ false };
+	std::queue<PlayState> out{};
+	out.push(playState);
 
-	int currentDepth{ parentDepth + 1 };
-
-	Tetrimino::Figure nextTetrimino{ gameState.nextTetriminos[currentDepth] };
-	size_t rotations{ Tetrimino::getTetriminoRotations(nextTetrimino) };
-
-	for (size_t r{ 0 }; r < rotations; ++r)
+	std::shared_ptr<WorkState> ptr{ parent };
+	while (ptr)
 	{
-		for (size_t c{ 0 }; c < parent.getPlayArea().cols; ++c)
-		{
-			bool isChildHighScore{ false };
-
-			if (PlayState temp{ parent }; temp.place(nextTetrimino, r, c))
-			{
-				isChildHighScore = findBestMoves(temp, currentDepth);
-			}
-
-			if (isChildHighScore)
-			{
-				isHighScore = true;
-			}
-		}
+		out.push(ptr->playState);
+		ptr = ptr->parent;
 	}
-	return isHighScore;
-}*/
+	return out;
+}
+
+Position WorkState::getNextPos() const
+{
+	size_t rotations{ Tetrimino::getTetriminoRotations(getTetrimino()) };
+	if (pos.second < playState.getPlayArea().cols - 1)
+	{
+		return { pos.first, pos.second + 1 };
+	}
+	else if (pos.first < rotations - 1)
+	{
+		return { pos.first + 1, 0 };
+	}
+	else
+	{
+		return first;
+	}
+}
+
+Tetrimino::Figure WorkState::getTetrimino() const
+{
+	return gameState.nextTetriminos[depth];
+}
