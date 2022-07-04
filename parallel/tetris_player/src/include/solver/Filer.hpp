@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <cstring>
 #include "./solver/common/GameState.hpp"
-#include "./solver/common/History.hpp"
 #include "./solver/common/PlayState.hpp"
 
 /**
@@ -40,7 +39,7 @@ public:
 	 * @brief Writes history of best play states into output files.
 	 * @param history List of ancestors of best play state.
 	 */
-	static void write(History& history);
+	static void write(std::queue<PlayState>& history);
 };
 
 void Filer::initialize()
@@ -98,18 +97,19 @@ GameState Filer::read(std::ifstream& file)
 	return { id, depth, playArea, nextTetriminos };
 }
 
-void Filer::write(History& history)
+void Filer::write(std::queue<PlayState>& history)
 {
 	initialize();
 
-	const size_t initialSize{ history.getSize() };
+	const size_t initialSize{ history.size() };
 	for (size_t i{ 0 }; i < initialSize; ++i)
 	{
 		std::string filename{ "../bin/put/tetris_play_"
-									  + std::to_string(i)
+									  + std::to_string(initialSize - 1 - i)
 									  + ".txt" };
 
-		PlayState current{ *history.pop() };
+		PlayState current{ history.front() };
+		history.pop();
 
 		std::ofstream file{ filename };
 		file.exceptions(std::ofstream::badbit | std::ifstream::failbit);

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <string>
+#include <queue>
 
 #include "./file/FileWatcher.hpp"
 #include "./solver/Filer.hpp"
@@ -55,41 +56,27 @@ void TetrisPlayer::start()
 
 				Logger::setStart();
 				Logger::info("Finding best moves for game state.");
-				History highScore{ Solver::solve(gameState) };
+				std::queue<PlayState> history{ Solver::solve(gameState) };
 				Logger::info("Successfully found best moves for game state.");
 
-				Filer::write(highScore);
+				Filer::write(history);
 				Logger::info("Successfully wrote best moves to files.");
 			}
-			catch (const std::invalid_argument&)
+			catch (const std::invalid_argument& ia)
 			{
-				// TODO(aarevalo) Logger::error("Failed to validate input
-				//  file values.",
-				// ia);
-				std::throw_with_nested(
-						std::invalid_argument(
-								"Failed to validate input file values.")
-				);
+				Logger::error("Failed to validate input file values.", ia);
 			}
-			catch (const std::out_of_range&)
+			catch (const std::out_of_range& oor)
 			{
-				std::throw_with_nested(
-						std::out_of_range(
-								"Failed to validate input file dimensions.")
-				);
+				Logger::error("Failed to validate input file dimensions.", oor);
 			}
-			catch (const std::domain_error&)
+			catch (const std::domain_error& de)
 			{
-				std::throw_with_nested(
-						std::domain_error("Failed to find best moves.")
-				);
+				Logger::error("Failed to find best moves.", de);
 			}
-			catch (const std::ios::failure&)
+			catch (const std::ios::failure& iof)
 			{
-				std::throw_with_nested(
-						std::ios::failure("Failed to open/close file: " +
-								std::string(std::strerror(errno)))
-				);
+				Logger::error("Failed to open/close file: " + std::string(std::strerror(errno)), iof);
 			}
 			catch (const std::exception& e)
 			{

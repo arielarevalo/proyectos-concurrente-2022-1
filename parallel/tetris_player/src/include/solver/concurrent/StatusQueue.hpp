@@ -102,9 +102,8 @@ StatusQueue<T>::signUp(std::shared_ptr<StatusConsumer<T>> sa)
 template<typename T>
 void StatusQueue<T>::push(const T& data)
 {
-	mutex.lock();
+	std::scoped_lock lock{ mutex };
 	queue.push(data);
-	mutex.unlock();
 	canConsume.signal();
 }
 
@@ -112,10 +111,9 @@ template<typename T>
 T StatusQueue<T>::pop()
 {
 	canConsume.wait();
-	mutex.lock();
+	std::scoped_lock lock{ mutex };
 	T result = queue.front();
 	queue.pop();
-	mutex.unlock();
 	return result;
 }
 
@@ -143,9 +141,8 @@ bool StatusQueue<T>::isEmpty()
 template<typename T>
 void StatusQueue<T>::refreshSize()
 {
-	mutex.lock();
+	std::scoped_lock lock{ mutex };
 	size = this->queue.size();
-	mutex.unlock();
 }
 
 template<typename T>

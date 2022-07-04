@@ -11,8 +11,14 @@
 /**
  * @brief A matrix of characters.
  */
-class Matrix {
+class Matrix
+{
 public:
+	/**
+	 *
+	 */
+	Matrix() = default;
+
 	/**
 	 * @brief Constructs a matrix of characters of the specified dimensions.
 	 * @param rows Number of rows.
@@ -20,7 +26,9 @@ public:
 	 */
 	Matrix(size_t rows, size_t cols)
 			:rows(rows), cols(cols),
-			 value(std::vector<std::string>(rows, std::string(cols, '0'))) { }
+			 value(std::vector<std::string>(rows, std::string(cols, '0')))
+	{
+	}
 
 	/**
 	 * @brief Prints the matrix contents to console.
@@ -47,15 +55,16 @@ public:
 	 */
 	const std::string& operator[](size_t i) const;
 
-	const size_t rows;
-	const size_t cols;
+	const size_t rows{ 0 };
+	const size_t cols{ 0 };
 private:
-	std::vector<std::string> value;
+	std::vector<std::string> value{};
 };
 
 void Matrix::print() const
 {
-	for (const std::string& s : value) {
+	for (const std::string& s : value)
+	{
 		std::cout << "\t" << s << std::endl;
 	}
 }
@@ -64,7 +73,8 @@ void Matrix::print(std::ofstream& file) const
 {
 	file << rows << std::endl;
 	file << cols << std::endl;
-	for (const std::string& s : value) {
+	for (const std::string& s : value)
+	{
 		file << s << std::endl;
 	}
 }
