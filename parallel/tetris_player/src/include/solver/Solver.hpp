@@ -88,7 +88,7 @@ std::queue<PlayState> Solver::solve(const GameState& gameState)
 void Solver::initializeQueue(std::shared_ptr<StatusQueue<WorkState>>& queue,
 		const GameState& gameState)
 {
-	long numAssemblers{ 1 };
+	long numAssemblers{ sysconf(_SC_NPROCESSORS_ONLN) };
 
 	for (int a{ 0 }; a < numAssemblers; ++a)
 	{
