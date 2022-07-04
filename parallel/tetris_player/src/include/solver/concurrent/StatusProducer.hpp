@@ -1,8 +1,10 @@
-// Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>
-// Copyright 2022 Pablo Madrigal Ramirez <pablo.madrigalramirez@ucr.ac.cr>
+/// @copyright 2020 ECCI, Universidad de Costa Rica. All rights reserved
+/// This code is released under the GNU Public License version 3
+/// @author Jeisson Hidalgo-Céspedes <jeisson.hidalgo@ucr.ac.cr>
 
 #pragma once
 
+#include <cassert>
 #include <memory>
 
 #include "./jeisson/Thread.hpp"
@@ -15,9 +17,10 @@ class StatusProducer : public virtual Thread
 	DISABLE_COPY(StatusProducer);
 
 public:
-	StatusProducer() = default;
-
-	void setProducingQueue(std::shared_ptr<StatusQueue<T>> producingQueue);
+	explicit StatusProducer(std::shared_ptr<StatusQueue<T>> producingQueue)
+			:producingQueue(producingQueue)
+	{
+	}
 
 	virtual void produce(const T& data);
 
@@ -25,12 +28,6 @@ private:
 	std::shared_ptr<StatusQueue<T>> producingQueue;
 };
 
-template<typename T>
-void StatusProducer<T>::setProducingQueue(
-		std::shared_ptr<StatusQueue<T>> producingQueue)
-{
-	this->producingQueue = producingQueue;
-}
 
 template<typename T>
 void StatusProducer<T>::produce(const T& data)

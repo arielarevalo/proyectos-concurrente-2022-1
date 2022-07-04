@@ -1,15 +1,14 @@
-// Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>
-// Copyright 2022 Pablo Madrigal Ramirez <pablo.madrigalramirez@ucr.ac.cr>
+/// @copyright 2020 ECCI, Universidad de Costa Rica. All rights reserved
+/// This code is released under the GNU Public License version 3
+/// @author Jeisson Hidalgo-Céspedes <jeisson.hidalgo@ucr.ac.cr>
 
 #pragma once
 
+#include <cassert>
 #include <memory>
 
 #include "./jeisson/Thread.hpp"
 #include "./StatusQueue.hpp"
-
-template<typename T>
-class StatusQueue;
 
 template<typename T>
 class StatusConsumer : public virtual Thread
@@ -18,8 +17,9 @@ class StatusConsumer : public virtual Thread
 	DISABLE_COPY(StatusConsumer);
 
 public:
-	explicit StatusConsumer(const T& stopCondition)
-			:stopCondition(stopCondition)
+	explicit StatusConsumer(std::shared_ptr<StatusQueue<T>> consumingQueue,
+			const T& stopCondition)
+			:consumingQueue(consumingQueue), stopCondition(stopCondition)
 	{
 	}
 
@@ -31,24 +31,17 @@ public:
 
 	virtual void consumeForever();
 
-	virtual void setConsumingQueue(
-			std::shared_ptr<StatusQueue<T>> consumingQueue);
-
-	bool isBusy() const;
-
 protected:
 	const T stopCondition;
 
-	std::shared_ptr<StatusQueue<T>> consumingQueue;
-
 private:
-	bool busy{ false };
+	std::shared_ptr<StatusQueue<T>> consumingQueue;
 };
 
 template<typename T>
 void StatusConsumer<T>::check()
 {
-	if (this->consumingQueue->isDone())
+	if (this->consumingQueue->done())
 	{
 		finalize();
 	}
@@ -62,35 +55,14 @@ void StatusConsumer<T>::consumeForever()
 	{
 		T data{ consumingQueue->pop() };
 
-		busy = true;
-
-		consumingQueue->refreshSize();
-
 		if (data == stopCondition)
 		{
-			busy = false;
+			finalize();
 			break;
 		}
 
 		consume(data);
 
-		consumingQueue->refreshSize();
-
-		busy = false;
-
 		check();
 	}
-}
-
-template<typename T>
-void StatusConsumer<T>::setConsumingQueue(
-		std::shared_ptr<StatusQueue<T>> consumingQueue)
-{
-	this->consumingQueue = consumingQueue;
-}
-
-template<typename T>
-bool StatusConsumer<T>::isBusy() const
-{
-	return busy;
 }

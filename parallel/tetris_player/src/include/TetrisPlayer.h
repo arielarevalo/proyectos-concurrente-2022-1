@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include <deque>
 #include <string>
-#include <queue>
 
 #include "./file/FileWatcher.hpp"
 #include "./solver/Filer.hpp"
@@ -31,6 +31,7 @@ void TetrisPlayer::start()
 	Logger::info("Starting file watch loop.");
 	while (true)
 	{
+		Logger::setStart();
 		std::string path{ fw.watch() };
 
 		if (path == std::string{ Filer::INITIAL_PATH }
@@ -56,7 +57,7 @@ void TetrisPlayer::start()
 
 				Logger::setStart();
 				Logger::info("Finding best moves for game state.");
-				std::queue<PlayState> history{ Solver::solve(gameState) };
+				std::deque<PlayState> history{ Solver::solve(gameState) };
 				Logger::info("Successfully found best moves for game state.");
 
 				Filer::write(history);

@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cstddef>
+#include <deque>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -39,7 +40,7 @@ public:
 	 * @brief Writes history of best play states into output files.
 	 * @param history List of ancestors of best play state.
 	 */
-	static void write(std::queue<PlayState>& history);
+	static void write(std::deque<PlayState>& history);
 };
 
 void Filer::initialize()
@@ -97,7 +98,7 @@ GameState Filer::read(std::ifstream& file)
 	return { id, depth, playArea, nextTetriminos };
 }
 
-void Filer::write(std::queue<PlayState>& history)
+void Filer::write(std::deque<PlayState>& history)
 {
 	initialize();
 
@@ -105,11 +106,11 @@ void Filer::write(std::queue<PlayState>& history)
 	for (size_t i{ 0 }; i < initialSize; ++i)
 	{
 		std::string filename{ "../bin/put/tetris_play_"
-									  + std::to_string(initialSize - 1 - i)
+									  + std::to_string(i)
 									  + ".txt" };
 
 		PlayState current{ history.front() };
-		history.pop();
+		history.pop_front();
 
 		std::ofstream file{ filename };
 		file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
