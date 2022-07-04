@@ -5,34 +5,37 @@
 
 #include <unistd.h>
 #include <cstddef>
+#include <deque>
 #include <iostream>
 #include <memory>
 #include <mutex>
 #include <utility>
 #include <vector>
-#include <queue>
 
 #include "./concurrent/StatusAssembler.hpp"
+#include "./concurrent/StatusProducer.hpp"
 #include "./concurrent/StatusQueue.hpp"
 #include "./common/WorkState.hpp"
 #include "./logger/Logger.hpp"
 
+//TODO(aarevalo): Commnents.
+
+using History = std::deque<PlayState>;
+
 class Solver
 {
 public:
-	static std::queue<PlayState> solve(const GameState& gameState);
+	static History solve(const GameState& gameState);
 
 private:
-	class TAssembler : public StatusAssembler<WorkState>
+	class TQueue : public StatusQueue<WorkState>
+	{
+		bool done() const override;
+	};
+	class TAssembler : public StatusAssembler<WorkState, WorkState>
 	{
 	public:
 		using StatusAssembler::StatusAssembler;
-
-		/**
-		 * Task to run in thread. Consumes forever until stop condition.
-		 * @return Exit code.
-		 */
-		int run() override;
 
 		/**
 		 * Consumes each element in the queue. Handles each WorkState object by
@@ -43,35 +46,64 @@ private:
 		void consume(WorkState current) override;
 	};
 
-	static void initializeQueue(std::shared_ptr<StatusQueue<WorkState>>& queue,
-			const GameState& gameState);
+	class TProducer : public StatusProducer<WorkState>
+	{
+	public:
+		TProducer(std::shared_ptr<StatusQueue<WorkState>> producingQueue,
+				const GameState& gameState)
+				:StatusProducer<WorkState>(producingQueue), gameState(gameState)
+		{
+		}
 
-	static void compare(const std::queue<PlayState>& incoming);
+		int run() override;
 
-	static std::queue<PlayState> highScore;
+		const GameState& gameState;
+	};
+
+	static void startAssemblers(const GameState& gameState);
+
+	static void waitForAssemblers();
+
+	static void startProducer(const GameState& gameState);
+
+	static void compare(const History& incoming);
+
+	static std::vector<std::unique_ptr<TAssembler>> assemblers;
+
+	static std::unique_ptr<TProducer> producer;
+
+	static std::shared_ptr<TQueue> statusQueue;
+
+	static std::unique_ptr<History> highScore;
 
 	static std::mutex mutex;
 };
 
-std::queue<PlayState> Solver::highScore{};
+std::vector<std::unique_ptr<Solver::TAssembler>> Solver::assemblers{};
+
+std::unique_ptr<Solver::TProducer> Solver::producer{};
+
+std::shared_ptr<Solver::TQueue> Solver::statusQueue{};
+
+std::unique_ptr<History> Solver::highScore{};
 
 std::mutex Solver::mutex{};
 
-std::queue<PlayState> Solver::solve(const GameState& gameState)
+History Solver::solve(const GameState& gameState)
 {
-	std::shared_ptr<StatusQueue<WorkState>> statusQueue;
+	statusQueue = std::make_unique<TQueue>();
 
-	initializeQueue(statusQueue, gameState);
+	startProducer(gameState);
 
-	statusQueue->refreshSize();
+	producer->waitToFinish();
 
-	statusQueue->startConsumers();
+	startAssemblers(gameState);
 
-	statusQueue->waitForConsumers();
+	waitForAssemblers();
 
-	if (!highScore.empty())
+	if (highScore)
 	{
-		return highScore;
+		return *highScore;
 	}
 	else
 	{
@@ -79,18 +111,22 @@ std::queue<PlayState> Solver::solve(const GameState& gameState)
 	}
 }
 
-void Solver::initializeQueue(std::shared_ptr<StatusQueue<WorkState>>& queue,
-		const GameState& gameState)
+bool Solver::TQueue::done() const
 {
-	long numAssemblers{ 1 };
+	return empty();
+}
 
-	for (int a{ 0 }; a < numAssemblers; ++a)
+void Solver::TAssembler::consume(WorkState current)
+{
+	History candidate{ current.work() };
+	if (!candidate.empty())
 	{
-		std::shared_ptr<TAssembler> assembler
-				{ std::make_shared<TAssembler>(WorkState::stopCondition) };
-		queue = StatusQueue<WorkState>::signUp(assembler);
+		compare(candidate);
 	}
+}
 
+int Solver::TProducer::run()
+{
 	Tetrimino::Figure firstTetrimino{ gameState.nextTetriminos[0] };
 	size_t rotations{ Tetrimino::getTetriminoRotations(firstTetrimino) };
 	size_t columns{ gameState.playArea.cols };
@@ -99,32 +135,48 @@ void Solver::initializeQueue(std::shared_ptr<StatusQueue<WorkState>>& queue,
 	{
 		for (size_t j{ 0 }; j < columns; ++j)
 		{
-			queue->push(WorkState{ gameState, Position{ i, j }});
+			produce(WorkState{ gameState, Position{ i, j }});
 		}
 	}
-	queue->refreshSize();
-}
-
-int Solver::TAssembler::run()
-{
-	this->consumeForever();
-
 	return EXIT_SUCCESS;
 }
 
-void Solver::TAssembler::consume(WorkState current)
+void Solver::startAssemblers(const GameState& gameState)
 {
-	std::queue<PlayState> candidate{ current.work() };
-	if(!candidate.empty()) {
-		compare(candidate);
+	long numAssemblers{ sysconf(_SC_NPROCESSORS_ONLN) };
+
+	//impossible state
+	WorkState stopCondition{ gameState, Position{ 0, gameState.playArea.cols }};
+
+	for (size_t a{ 0 }; a < numAssemblers; ++a)
+	{
+		assemblers.push_back(
+				std::make_unique<TAssembler>(statusQueue, statusQueue,
+						stopCondition));
+		assemblers.back()->startThread();
 	}
 }
 
-void Solver::compare(const std::queue<PlayState>& incoming)
+void Solver::waitForAssemblers()
+{
+	while(!assemblers.empty()) {
+		assemblers.back()->waitToFinish();
+		assemblers.pop_back();
+	}
+}
+
+void Solver::startProducer(const GameState& gameState)
+{
+	producer = std::make_unique<TProducer>(statusQueue, gameState);
+
+	producer->startThread();
+}
+
+void Solver::compare(const History& incoming)
 {
 	std::scoped_lock lock{ mutex };
-	if (highScore.empty() || incoming.back() > highScore.back())
+	if (!highScore || incoming.back() > highScore->back())
 	{
-		highScore = incoming;
+		highScore = std::make_unique<History>(incoming);
 	}
 }

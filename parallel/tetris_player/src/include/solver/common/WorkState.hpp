@@ -3,8 +3,8 @@
 
 #pragma once
 
+#include <deque>
 #include <memory>
-#include <queue>
 #include <utility>
 
 #include "./GameState.hpp"
@@ -18,8 +18,6 @@ using Position = std::pair<size_t, size_t>; // { rot, col }
 class WorkState
 {
 public:
-	static const WorkState stopCondition;
-
 	explicit WorkState(const GameState& gameState, Position pos)
 			:gameState(gameState), pos(std::move(pos))
 	{
@@ -32,7 +30,7 @@ public:
 
 	bool operator==(const WorkState& other) const;
 
-	std::queue<PlayState> work();
+	std::deque<PlayState> work();
 
 private:
 	static constexpr Position first{ 0, 0 };
@@ -48,12 +46,10 @@ private:
 
 	const GameState& gameState;
 
-	std::queue<PlayState> history{};
+	std::deque<PlayState> history{};
 
 	Position pos{ first };
 };
-
-const WorkState WorkState::stopCondition{ GameState{}};
 
 bool WorkState::operator==(const WorkState& other) const
 {
@@ -61,7 +57,7 @@ bool WorkState::operator==(const WorkState& other) const
 			&& (this->pos == other.pos);
 }
 
-std::queue<PlayState> WorkState::work()
+std::deque<PlayState> WorkState::work()
 {
 	PlayState initial{ gameState };
 	process(initial, 0, pos.first, pos.second);
@@ -81,7 +77,7 @@ bool WorkState::process(PlayState& current, size_t currentDepth,
 
 		if (isHighScore)
 		{
-			history.push(current);
+			history.push_front(current);
 		}
 	}
 	return isHighScore;
@@ -115,7 +111,7 @@ bool WorkState::compare(const PlayState& current)
 	{
 		while (!history.empty())
 		{
-			history.pop();
+			history.pop_back();
 		}
 		return true;
 	}

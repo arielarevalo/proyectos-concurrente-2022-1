@@ -5,49 +5,49 @@
 
 #include <memory>
 
-#include "./jeisson/Assembler.hpp"
+#include "./StatusQueue.hpp"
 #include "./StatusConsumer.hpp"
 #include "./StatusProducer.hpp"
-#include "./StatusQueue.hpp"
-
-template<typename T>
-class StatusQueue;
 
 /**
  * Single queue
  * @tparam T
  */
-template<typename T>
-class StatusAssembler : public StatusConsumer<T>, public StatusProducer<T>
+template<typename T, typename U>
+class StatusAssembler : public StatusConsumer<T>, public StatusProducer<U>
 {
+
+	DISABLE_COPY(StatusAssembler);
+
 public:
-	explicit StatusAssembler(const T& stopCondition)
-			:StatusConsumer<T>(stopCondition),
-			 StatusProducer<T>()
+	StatusAssembler(std::shared_ptr<StatusQueue<T>> consumingQueue,
+			std::shared_ptr<StatusQueue<U>> producingQueue,
+			const T& stopCondition)
+			:StatusConsumer<T>(consumingQueue, stopCondition),
+			 StatusProducer<U>(producingQueue)
 	{
 	}
+
+private:
+	/**
+	 * Task to run in thread. Consumes forever until stop condition.
+	 * @return Exit code.
+	 */
+	int run() override;
 
 	void finalize() override;
-
-	void
-	setConsumingQueue(std::shared_ptr<StatusQueue<T>> consumingQueue) override;
 };
 
-template<typename T>
-void StatusAssembler<T>::finalize()
+template<typename T, typename U>
+int StatusAssembler<T, U>::run()
 {
-	size_t numMembers{ this->consumingQueue->getMembersSize() };
+	this->consumeForever();
 
-	for (size_t w{ 0 }; w < numMembers; ++w)
-	{
-		this->produce(this->stopCondition);
-	}
+	return EXIT_SUCCESS;
 }
 
-template<typename T>
-void StatusAssembler<T>::setConsumingQueue(
-		std::shared_ptr<StatusQueue<T>> consumingQueue)
+template<typename T, typename U>
+void StatusAssembler<T, U>::finalize()
 {
-	StatusProducer<T>::setProducingQueue(consumingQueue);
-	StatusConsumer<T>::setConsumingQueue(consumingQueue);
+	this->produce(this->stopCondition);
 }
