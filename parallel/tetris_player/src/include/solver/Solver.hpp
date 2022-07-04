@@ -41,25 +41,19 @@ private:
 		 * @param WorkState WorkState object to be consumed.
 		 */
 		void consume(WorkState current) override;
-
-		/**
-		 *
-		 * @param current
-		 */
-		void produceNext(const WorkState& current);
 	};
 
 	static void initializeQueue(std::shared_ptr<StatusQueue<WorkState>>& queue,
 			const GameState& gameState);
 
-	static void compare(const WorkState& current);
+	static void compare(const std::queue<PlayState>& incoming);
 
-	static std::unique_ptr<WorkState> highScore;
+	static std::queue<PlayState> highScore;
 
 	static std::mutex mutex;
 };
 
-std::unique_ptr<WorkState> Solver::highScore{};
+std::queue<PlayState> Solver::highScore{};
 
 std::mutex Solver::mutex{};
 
@@ -75,9 +69,9 @@ std::queue<PlayState> Solver::solve(const GameState& gameState)
 
 	statusQueue->waitForConsumers();
 
-	if (highScore)
+	if (!highScore.empty())
 	{
-		return highScore->getPlayStates();
+		return highScore;
 	}
 	else
 	{
@@ -111,15 +105,6 @@ void Solver::initializeQueue(std::shared_ptr<StatusQueue<WorkState>>& queue,
 	queue->refreshSize();
 }
 
-void Solver::compare(const WorkState& current)
-{
-	std::scoped_lock lock{ mutex };
-	if (!highScore || current > *highScore)
-	{
-		highScore = std::make_unique<WorkState>(current);
-	}
-}
-
 int Solver::TAssembler::run()
 {
 	this->consumeForever();
@@ -129,30 +114,17 @@ int Solver::TAssembler::run()
 
 void Solver::TAssembler::consume(WorkState current)
 {
-	if (current.place())
-	{
-		if (!current.isMaxDepth())
-		{
-			WorkState child{ std::make_shared<WorkState>(current) };
-			consume(child);
-		}
-		else
-		{
-			compare(current);
-			produceNext(current);
-		}
-	}
-	else
-	{
-		produceNext(current);
+	std::queue<PlayState> candidate{ current.work() };
+	if(!candidate.empty()) {
+		compare(candidate);
 	}
 }
 
-void Solver::TAssembler::produceNext(const WorkState& current)
+void Solver::compare(const std::queue<PlayState>& incoming)
 {
-	WorkState next{ WorkState::getNext(current) };
-	if (!(WorkState::stopCondition == std::as_const(next)))
+	std::scoped_lock lock{ mutex };
+	if (highScore.empty() || incoming.back() > highScore.back())
 	{
-		produce(next);
+		highScore = incoming;
 	}
 }
