@@ -80,11 +80,9 @@ respecto a los requisitos es el siguiente:
 | StatusAssembler | Implementacion del Assembler.                                                         |
 | StatusProducer  | Implementacion del Producer y coloca unidades de trabajo a la cola.                   |
 | StatusQueue     | Manejo las unidades de trabajo en la cola.                                            |
-| FileEditor      | Validación de entradas. Conversión de archivo a `InState` y de `PlayState` a archivo. |
+| Filer           | Validación de entradas. Conversión de archivo a `InState` y de `PlayState` a archivo. |
 | FileWatcher     | Monitorea los cambios en el fichero e informa esos cambios al programa.               |
 | Logger          | Gestionar mensajes del estado del programa.                                           |
-| Comparator      | Navega las permutaciones de los `PlayState` y puntúa cada `PlayState.playArea`.       |
-| Permutator      | Generar las unidades de trabajo.                                                      |
 | Solver          | Resolver una jugada de tetris.                                                        |
 ### FileWatcher
 
@@ -130,36 +128,31 @@ de lo contrario, `false`.
 
 ### Solver
 
-#### Find Best Moves
-
-El algoritmo `findBestMoves` se ocupa de navegar las permutaciones de cada
-estado de juego a partir del estado de juego inicial. En cada nivel de
-profundidad, empezando desde el -1, se hallan todos los posibles estados de
-juego hijos/permutación del estado de juego de entrada con el método
-`findBestChild`, y al llegar al nivel de profundidad indicado en el archivo de
-entrada como el máximo se puntúa el estado de juego, y compara con el puntaje
-del estado de juego de puntaje máximo, guardado en el arreglo `history` usando
-el método `compareToBest`. A la hora de ir subiendo de vuelta los niveles de
-profundidad, el valor de retorno de cada función indica si en el siguiente nivel
-más profundo al actual se halló un estado de juego de puntaje máximo, en cuyo
-caso se agrega el estado de nivel actual al arreglo `history`.
-
-    Solver {
-      GameState gameState
-      vector<PlayState> history
+    History Solver::solve(const GameState& gameState) {
+      statusQueue = std::make_unique<TQueue>();
+      startProducer(gameState);
+      producer->waitToFinish();
+      startAssemblers(gameState);
+      waitForAssemblers();
+      if (highScore)
+      {
+          return *highScore;
+      }
+      else
+      {
+          throw std::domain_error("No valid moves down to requested depth.");
+      }
     }
 
-    findBestMoves(PlayState current, int currentDepth)
-      finalDepth = gameState.depth
-      isHighScore = false
+#### StatusConsumer
 
-      if (currentDepth < finalDepth)
-          isHighScore = findBestChild(initial, currentDepth, current, history)
-          if (currentDepth > -1 && isHighScore)
-              history.push(current)
-      else if (current_depth == final_depth)
-          isHighScore = compareToBest(final_depth, current, history)
-      return isHighScore
+Consume cada elemento en la cola. Maneja cada objeto WorkState colocando la última permutación y permutando o comparando
+el objeto WorkState resultante.
+
+#### StatusProducer
+
+Producre cada elemento en la cola.
+
 
 ### Diagramas
 
