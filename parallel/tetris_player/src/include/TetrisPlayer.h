@@ -10,15 +10,18 @@
 #include "./solver/Filer.hpp"
 #include "./solver/Solver.hpp"
 
+/**
+ * @brief Executes a Tetris Player instance.
+ */
 class TetrisPlayer
 {
 public:
 	/**
- * @brief Starts watching the target directory.
- * @details Watches a directory using the inotify library to continuously
- * monitor a specific folder and, on given file system events, finalize
- * for target file names and process the files.
- */
+	 * @brief Starts watching the target directory.
+	 * @details Watches a directory using the inotify library to continuously
+	 * monitor a specific folder and, on given file system events, finalize
+	 * for target file names and process the files.
+	 */
 	static void start();
 };
 
@@ -77,7 +80,8 @@ void TetrisPlayer::start()
 			}
 			catch (const std::ios::failure& iof)
 			{
-				Logger::error("Failed to open/close file: " + std::string(std::strerror(errno)), iof);
+				Logger::error("Failed to open/close file: "
+						+ std::string(std::strerror(errno)), iof);
 			}
 			catch (const std::exception& e)
 			{

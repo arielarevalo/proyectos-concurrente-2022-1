@@ -15,6 +15,9 @@
 class GameState
 {
 public:
+	/**
+	 * Constructs a degenerate Game State.
+	 */
 	GameState() = default;
 
 	/**

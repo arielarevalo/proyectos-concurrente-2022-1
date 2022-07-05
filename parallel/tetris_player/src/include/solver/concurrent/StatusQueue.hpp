@@ -10,20 +10,43 @@
 #include "./jeisson/Common.hpp"
 #include "./jeisson/Semaphore.hpp"
 
+/**
+ * @brief Holds work units and is able to broadcast whether work is done.
+ * @tparam T Data type the queue will hold.
+ */
 template<typename T>
 class StatusQueue
 {
 	DISABLE_COPY(StatusQueue);
 
 public:
+	/**
+	 * @brief Constructs an empty StatusQueue.
+	 */
 	StatusQueue() = default;
 
+	/**
+	 * @brief Thread safe adds data onto queue.
+	 * @param data Data to add.
+	 */
 	void push(const T& data);
 
+	/**
+	 * @brief Thread safe removes data from queue.
+	 * @param data Data to remove.
+	 */
 	T pop();
 
+	/**
+	 * @brief Signals whether work at this queue has completed.
+	 * @return Whether work has completed.
+	 */
 	virtual bool done() const = 0;
 
+	/**
+	 * @brief Returns whether queue is empty.
+	 * @return Whether queue is empty.
+	 */
 	bool empty() const;
 
 protected:

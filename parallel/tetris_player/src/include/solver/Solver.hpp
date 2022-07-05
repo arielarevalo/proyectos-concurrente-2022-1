@@ -20,14 +20,25 @@
 
 using History = std::deque<PlayState>;
 
+/**
+ * @brief Executes an instance of Tetris Solver for a single GameState.
+ */
 class Solver
 {
 public:
+	/**
+	 * @brief Solves a single GameState.
+	 * @param gameState Game state to solve.
+	 * @return History for highest scoring PlayState.
+	 */
 	static History solve(const GameState& gameState);
 
 private:
 	class TQueue : public StatusQueue<WorkState>
 	{
+		/**
+		 * @copydoc
+		 */
 		bool done() const override;
 	};
 	class TAssembler : public StatusAssembler<WorkState, WorkState>
@@ -36,9 +47,10 @@ private:
 		using StatusAssembler::StatusAssembler;
 
 		/**
-		 * Consumes each element in the queue. Handles each WorkState object by
-		 * placing the latest permutation and either permuting or comparing
-		 * the resulting WorkState object.
+		 * @brief Consumes each element in the queue.
+		 * @details Handles each WorkState object by placing the latest
+		 * permutation and either permuting or comparing the resulting
+		 * WorkState object.
 		 * @param WorkState WorkState object to be consumed.
 		 */
 		void consume(WorkState current) override;
@@ -53,17 +65,35 @@ private:
 		{
 		}
 
+		/**
+		 * @copydoc
+		 */
 		int run() override;
 
 		const GameState& gameState;
 	};
 
+	/**
+	 * @brief Initializes assemblers and starts them.
+	 * @param gameState Game state to process.
+	 */
 	static void startAssemblers(const GameState& gameState);
 
+	/**
+	 * @brief Sets to wait for assemblers to end and join.
+	 */
 	static void waitForAssemblers();
 
+	/**
+	 * @brief Initializes and starts the producer.
+	 * @param gameState Game state to produce for.
+	 */
 	static void startProducer(const GameState& gameState);
 
+	/**
+	 * @brief Compares a given History with the high score History.
+	 * @param incoming History instance to compare.
+	 */
 	static void compare(const History& incoming);
 
 	static std::vector<std::unique_ptr<TAssembler>> assemblers;

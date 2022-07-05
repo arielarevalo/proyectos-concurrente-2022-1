@@ -10,6 +10,11 @@
 #include "./jeisson/Thread.hpp"
 #include "./StatusQueue.hpp"
 
+/**
+ * @brief Consumes a consumption queues
+ * @details until check is true, at which point it calls finalize.
+ * @tparam T Data type for the consumption queue.
+ */
 template<typename T>
 class StatusProducer : public virtual Thread
 {
@@ -17,11 +22,19 @@ class StatusProducer : public virtual Thread
 	DISABLE_COPY(StatusProducer);
 
 public:
+	/**
+	 * Constructs a StatusProducer instance.
+	 * @param producingQueue Production queue to push to.
+	 */
 	explicit StatusProducer(std::shared_ptr<StatusQueue<T>> producingQueue)
 			:producingQueue(producingQueue)
 	{
 	}
 
+	/**
+	 * @brief Pushes one element to production queue.
+	 * @param data
+	 */
 	virtual void produce(const T& data);
 
 private:

@@ -10,8 +10,11 @@
 #include "./StatusProducer.hpp"
 
 /**
- * Single queue
- * @tparam T
+ * @brief Assembles from production and consumption queues
+ * @details until StatusConsumer check is true, at which point it calls
+ * finalize. Finalize is defined here.
+ * @tparam T Data type for the consumption queue.
+ * @tparam U Data type for the production queue.
  */
 template<typename T, typename U>
 class StatusAssembler : public StatusConsumer<T>, public StatusProducer<U>
@@ -20,6 +23,12 @@ class StatusAssembler : public StatusConsumer<T>, public StatusProducer<U>
 	DISABLE_COPY(StatusAssembler);
 
 public:
+	/**
+	 * Constructs a StatusAssembler instance.
+	 * @param consumingQueue Consumption queue to pull from.
+	 * @param producingQueue Production queue to push to.
+	 * @param stopCondition Data type object that denotes shutdown.
+	 */
 	StatusAssembler(std::shared_ptr<StatusQueue<T>> consumingQueue,
 			std::shared_ptr<StatusQueue<U>> producingQueue,
 			const T& stopCondition)
@@ -30,11 +39,14 @@ public:
 
 private:
 	/**
-	 * Task to run in thread. Consumes forever until stop condition.
+	 * @brief Task to run in thread. Consumes forever until stop condition.
 	 * @return Exit code.
 	 */
 	int run() override;
 
+	/**
+	 * @brief Pushes stopCondition onto appropriate queue.
+	 */
 	void finalize() override;
 };
 
