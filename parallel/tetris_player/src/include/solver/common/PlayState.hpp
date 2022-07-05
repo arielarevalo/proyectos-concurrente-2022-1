@@ -71,7 +71,7 @@ bool PlayState::operator<(const PlayState& other) const
 
 bool PlayState::operator>(const PlayState& other) const
 {
-	return *this < other;
+	return !(*this < other);
 }
 
 bool PlayState::place(Tetrimino::Figure figure, size_t rotation, size_t column)

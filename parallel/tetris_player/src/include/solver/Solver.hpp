@@ -18,8 +18,6 @@
 #include "./common/WorkState.hpp"
 #include "./logger/Logger.hpp"
 
-//TODO(aarevalo): Commnents.
-
 using History = std::deque<PlayState>;
 
 class Solver
