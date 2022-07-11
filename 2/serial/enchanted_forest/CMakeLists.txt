@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(tetris_player)
-find_package(Threads REQUIRED)
-find_package(OpenMP REQUIRED)
+project(enchanted_forest)
 
 
 set(CMAKE_CXX_STANDARD 17)
@@ -13,8 +11,6 @@ set(INCLUDE_DIR ${SOURCES_DIR}/include)
 set(TARGET_SOURCES ${SOURCES_DIR}/Main.cpp)
 
 include_directories(${INCLUDE_DIR})
-link_libraries(Threads::Threads)
-link_libraries(OpenMP::OpenMP_CXX)
 
 set(DEFAULT_TARGET ${CMAKE_PROJECT_NAME})
 set(ASAN_TARGET ${DEFAULT_TARGET}_asan)

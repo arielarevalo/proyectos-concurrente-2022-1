@@ -1,9 +1,10 @@
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>.
+// Copyright 2022 Pablo Madrigal Ramírez <pablo.madrigalramirez@ucr.ac.cr>.
 
 #include <unistd.h>
 #include <omp.h>
 
-#include "./include/TetrisSolverParallel.hpp"
+#include "./include/Simulator.hpp"
 #include "./include/Logger.hpp"
 
 using namespace std;
@@ -27,11 +28,11 @@ int main(int argc, char* argv[])
 
 		try
 		{
-			TetrisSolverParallel::solve(numThreads, path);
+			Simulator::solve(numThreads, path);
 		}
 		catch (const std::exception& e)
 		{
-			Logger::error("TetrisSolverParallel has crashed.", e);
+			Logger::error("Simulator has crashed.", e);
 		}
 		exit(1);
 	}

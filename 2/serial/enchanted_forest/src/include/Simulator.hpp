@@ -16,7 +16,7 @@
  * @brief Solves a given game state by finding the best moves and outputting
  * them to files.
  */
-class TetrisSolverParallel
+class Simulator
 {
 public:
 	/**
@@ -28,7 +28,7 @@ public:
 	static void solve(long numThreads, std::string path);
 };
 
-void TetrisSolverParallel::solve(long numThreads, std::string path)
+void Simulator::solve(long numThreads, std::string path)
 {
 	Logger::setStart();
 
@@ -43,6 +43,10 @@ void TetrisSolverParallel::solve(long numThreads, std::string path)
 		{
 			GameState initial{ Filer::read(file) };
 			Logger::info("Successfully read initial game state from file.");
+
+			// loop: mientras para este mapa en el job falten noches
+			// // map.step()
+			// // filer.write(map)
 
 
 			Logger::info("Finding best moves.");
