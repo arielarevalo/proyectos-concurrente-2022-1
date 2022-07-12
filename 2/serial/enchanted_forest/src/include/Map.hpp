@@ -33,6 +33,56 @@ private:
 
 void Map::step()
 {
+
+    /* Idea para recorrer el mapa
+     * for (int x = 0; x < 10; x++)
+            {
+                for (int y = 0; y < 10; y++)
+                {
+                    int movimiento = 1;
+                    int puntoInicioFila = 0;
+                    int puntoInicioColumna = 0;
+                    int puntoFinalFila = 9;
+                    int puntoFinalColumna = 9;
+
+                    if (x - movimiento > 0)
+                    {
+                        puntoInicioFila = x - movimiento;
+                    }
+
+                    if (y - movimiento > 0)
+                    {
+                        puntoInicioColumna = x - movimiento;
+                    }
+
+                    if (x + movimiento < 10)
+                    {
+                        puntoFinalFila = x + movimiento;
+                    }
+
+                    if (y + movimiento < 10)
+                    {
+                        puntoFinalColumna = x + movimiento;
+                    }
+
+                    for (int i = puntoInicioFila; i < puntoFinalFila; i++)
+                    {
+                        for (int j = puntoInicioColumna; j < puntoFinalColumna; j++)
+                        {
+                            if (i == x && j == y)
+                            {
+                                continue;
+                            }
+                            Logica de negocio
+
+                        }
+                    }
+                }
+            }
+     *
+     * */
+
+
 	// revisar area:
 	// 	for size_t i [i][j]
 	// // revisar cuadricula:
