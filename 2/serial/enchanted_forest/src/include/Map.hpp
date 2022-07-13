@@ -150,7 +150,7 @@ Terrain Map::returnValueFromRule(Terrain value, size_t numberTrees, size_t numbe
             //Nótese que valor 1 2 y 3 son los valores que puede tomar la opción
             //la instrucción break es necesaria, para no ejecutar todos los casos.
         default: //Bloque de instrucciones por defecto;
-            //default, es el bloque que se ejecuta en caso de que no se de ningún caso
+            //default, es el bloque que se ejecuta en caso de que no se de ningún caso a
     }
 }
 
