@@ -22,6 +22,8 @@ public:
 	Terrain& operator=(const Terrain&) = delete;
 	Terrain& operator=(const Terrain&&) = delete;
 
+    bool operator==(const Terrain& other) const;
+
 	const char type;
 private:
 	static const Terrain arbol;
@@ -41,6 +43,11 @@ private:
 const Terrain Terrain::arbol{ 'a' };
 const Terrain Terrain::lago{ 'l' };
 const Terrain Terrain::pradera{ '-' };
+
+bool Terrain::operator==(const Terrain& other) const
+{
+    return (Terrain == other);
+};
 
 const Terrain& Terrain::getInstance(char key)
 {
