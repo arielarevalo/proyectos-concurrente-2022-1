@@ -17,5 +17,5 @@ public:
 
     static constexpr char lake { 'l' };
 
-    static constexpr char madow { '-' };
+    static constexpr char meadow { '-' };
 };
