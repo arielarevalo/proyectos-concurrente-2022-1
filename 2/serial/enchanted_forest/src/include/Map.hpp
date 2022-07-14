@@ -27,9 +27,9 @@ public:
     const size_t cols;
 private:
     size_t time{0};
-    Matrix<Terrain> area;
+    Matrix<char> area;
 
-    Terrain returnValueFromRule(Terrain value, size_t numberTrees, size_t numberLakes, size_t numberMeadows);
+    char returnValueFromRule(Terrain value, size_t numberTrees, size_t numberLakes, size_t numberMeadows);
 };
 
 void Map::step() {
@@ -67,7 +67,8 @@ void Map::step() {
                     }
                     // Cargar contadores = business logic
 
-                    char value = area[i][j];
+                    char value { area[i][j] };
+
                 }
             }
         }
@@ -138,14 +139,15 @@ void Map::step() {
      */
 }
 
-Terrain Map::returnValueFromRule(Terrain value, size_t numberTrees, size_t numberLakes, size_t numberMeadows) {
+char Map::returnValueFromRule(char value, size_t numberTrees, size_t numberLakes, size_t numberMeadows) {
+
     switch(value) //donde opción es la variable a comparar
     {
-        case Terrain::arbol: //Bloque de instrucciones 1;
+        case Terrain::tree : //Bloque de instrucciones 1;
             break;
-        case valor2: //Bloque de instrucciones 2;
+        case Terrain::lake: //Bloque de instrucciones 2;
             break;
-        case valor3: //Bloque de instrucciones 3;
+        case Terrain::madow: //Bloque de instrucciones 3;
             break;
             //Nótese que valor 1 2 y 3 son los valores que puede tomar la opción
             //la instrucción break es necesaria, para no ejecutar todos los casos.
