@@ -15,7 +15,7 @@ class Value;
 
 class Map {
 public:
-    Map(size_t rows, size_t cols, Matrix<Terrain> area)
+    Map(size_t rows, size_t cols, Matrix<char> area)
             : rows(rows), cols(cols), area(std::move(area)) {
     }
 
@@ -25,11 +25,17 @@ public:
 
     const size_t rows;
     const size_t cols;
+
 private:
     size_t time{0};
+
     Matrix<char> area;
 
-    char returnValueFromRule(Terrain value, size_t numberTrees, size_t numberLakes, size_t numberMeadows);
+    void reviewCurrentValue(size_t currentRow, size_t currentCol, size_t startRow, size_t endRow, size_t startCol, size_t endCol);
+
+    void returnNeighboursCounters(char value, char neighbour, size_t &tree, size_t &lake, size_t &madow);
+
+    char returnValueFromRule(char value, size_t numberTrees, size_t numberLakes, size_t numberMeadows);
 };
 
 void Map::step() {
@@ -58,20 +64,8 @@ void Map::step() {
                 endCol = x + move;
             }
 
-            size_t arbol = 0, lago = 0, pradera = 0;
-
-            for (int i = startRow; i < endRow; i++) {
-                for (int j = startCol; j < endCol; j++) {
-                    if (i == x && j == y) {
-                        continue;
-                    }
-                    // Cargar contadores = business logic
-
-                    char value { area[i][j] };
-
-                }
-            }
-        }
+            reviewCurrentValue(x, y, startRow, endRow, startCol, endCol);
+;        }
     }
 
     ++time;
@@ -130,30 +124,76 @@ void Map::step() {
     // // revisar cuadricula:
     // // // switch(terreno): si la celda es "terreno",
     // // // 	correr los isInundacion, isSecacion...
-
-    /*
-     *  "a" con >3 vecinos "l" -> "l"
-     *  "l" con <3 vecinos "l" -> "-"
-     *	"-" con >2 vecinos "a" -> "a"
-     *	"a" con >4 vecinos "a" -> "-"
-     */
 }
 
-char Map::returnValueFromRule(char value, size_t numberTrees, size_t numberLakes, size_t numberMeadows) {
+void Map::reviewCurrentValue(size_t currentRow, size_t currentCol, size_t startRow, size_t endRow, size_t startCol, size_t endCol) {
+    size_t tree { 0 }, lake { 0 }, madow { 0 };
 
-    switch(value) //donde opción es la variable a comparar
-    {
-        case Terrain::tree : //Bloque de instrucciones 1;
-            break;
-        case Terrain::lake: //Bloque de instrucciones 2;
-            break;
-        case Terrain::madow: //Bloque de instrucciones 3;
-            break;
-            //Nótese que valor 1 2 y 3 son los valores que puede tomar la opción
-            //la instrucción break es necesaria, para no ejecutar todos los casos.
-        default: //Bloque de instrucciones por defecto;
-            //default, es el bloque que se ejecuta en caso de que no se de ningún caso a
+    for (int i = startRow; i < endRow; i++) {
+        for (int j = startCol; j < endCol; j++) {
+            if (i == currentRow && j == currentCol) {
+                continue;
+            }
+
+            returnNeighboursCounters(area[currentRow][currentCol], area[i][j], tree, lake, madow);
+
+        }
     }
+
+    area[currentRow][currentCol] = returnValueFromRule(area[currentRow][currentCol], tree, lake, madow);
+}
+
+void Map::returnNeighboursCounters(char value, char neighbour, size_t &tree, size_t &lake, size_t &madow) {
+
+    if ((value == Terrain::tree && neighbour == Terrain::lake) ||
+            ((value == Terrain::tree && neighbour == Terrain::tree))) {
+        if (neighbour == Terrain::lake) {
+            lake = lake + 1;
+        } else {
+            tree = tree + 1;
+        }
+    }
+
+    if (value == Terrain::lake && neighbour == Terrain::lake) {
+        lake = lake + 1;
+    }
+
+    if (value == Terrain::madow && neighbour == Terrain::tree) {
+        tree = tree + 1;
+    }
+}
+
+
+char Map::returnValueFromRule(char value, size_t numberTrees, size_t numberLakes, size_t numberMeadows) {
+    /*
+ *  "a" con >3 vecinos "l" -> "l"
+ *  "l" con <3 vecinos "l" -> "-"
+ *	"-" con >2 vecinos "a" -> "a"
+ *	"a" con >4 vecinos "a" -> "-"
+ */
+
+    char result { value };
+
+    switch (value)
+    {
+        case Terrain::tree :
+            if(numberLakes > 3){
+                result = Terrain::lake;
+            } else if (numberTrees > 4){
+                result = Terrain::madow;
+            }
+            break;
+        case Terrain::lake:
+            result = numberLakes < 3 ? Terrain::madow : value;
+            break;
+        case Terrain::madow:
+            result = numberTrees > 2 ? Terrain::tree : value;
+            break;
+        default:
+            break;
+    }
+
+    return  result;
 }
 
 
