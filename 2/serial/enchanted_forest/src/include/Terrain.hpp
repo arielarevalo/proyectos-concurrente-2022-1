@@ -13,48 +13,9 @@
 class Terrain
 {
 public:
-	static const Terrain& getInstance(char key);
+    static constexpr char tree { 'a' };
 
-	// Deleted to preserve immutability
-	Terrain() = delete;
-	Terrain(const Terrain&) = delete;
-	Terrain(const Terrain&&) = delete;
-	Terrain& operator=(const Terrain&) = delete;
-	Terrain& operator=(const Terrain&&) = delete;
+    static constexpr char lake { 'l' };
 
-	const char type;
-private:
-	static const Terrain arbol;
-	static const Terrain lago;
-	static const Terrain pradera;
-
-	/**
-	 * Constructs a Tetrimino from a full set of fields.
-	 * @param type Height of the Tetrimino.
-	 */
-	explicit Terrain(char type)
-			:type(type)
-	{
-	}
+    static constexpr char meadow { '-' };
 };
-
-const Terrain Terrain::arbol{ 'a' };
-const Terrain Terrain::lago{ 'l' };
-const Terrain Terrain::pradera{ '-' };
-
-const Terrain& Terrain::getInstance(char key)
-{
-	switch (key)
-	{
-	case 'a':
-		return arbol;
-	case 'l':
-		return lago;
-	case '-':
-		return pradera;
-	default:
-		std::string message{ "Character does not have terrain assigned:" };
-		message.push_back(key);
-		throw std::invalid_argument(message);
-	}
-}
