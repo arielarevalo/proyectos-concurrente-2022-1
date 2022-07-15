@@ -1,6 +1,9 @@
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>.
 // Copyright 2022 Pablo Madrigal Ramírez <pablo.madrigalramirez@ucr.ac.cr>.
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "readability-convert-member-functions-to-static"
+
 #pragma once
 
 #include <fstream>
@@ -8,7 +11,6 @@
 #include <utility>
 #include <vector>
 
-#include "./Logger.hpp"
 #include "./Map.hpp"
 
 /**
@@ -24,73 +26,22 @@ public:
  	 * optimal move, and generates the output files.
 	 * @param file Input game state file.
 	 */
-	Map step(Map map);
+	[[nodiscard]] Map step(const Map& source) const;
 };
 
-void Simulator::step()
+Map Simulator::step(const Map& source) const
 {
-	for (size_t i{ 0 }; i < rows; i++)
+	Map dest{ source };
+	for (size_t i{ 0 }; i < source.rows; i++)
 	{
-		for (size_t j{ 0 }; j < cols; j++)
+		for (size_t j{ 0 }; j < source.cols; j++)
 		{
 			Point current{ i, j };
-			getNextTerrain(current);
+			char next{ source.getNextTerrain(current) };
+			dest[current] = next;
 		}
 	}
-	++time;
+	return dest;
 }
 
-Map Simulator::step(Map map)
-{
-	Logger::setStart();
-
-	if (!path.empty())
-	{
-		std::ifstream file{ path };
-
-		file.exceptions(
-				std::ifstream::badbit | std::ifstream::failbit);
-
-		try
-		{
-			GameState initial{ Filer::read(file) };
-			Logger::info("Successfully read initial game state from file.");
-
-			// loop: mientras para este mapa en el job falten noches
-			// // map.step()
-			// // filer.write(map)
-
-
-			Logger::info("Finding best moves.");
-			Manager manager{ initial };
-
-			Logger::setStart();
-			std::vector<PlayState> history{ manager.solveBestMoves() };
-			Logger::info("Successfully found best moves for game state.");
-
-			Filer::write(history);
-			Logger::info("Successfully wrote best moves to files.");
-		}
-		catch (const std::invalid_argument& ia)
-		{
-			Logger::error("Failed to validate input file values.", ia);
-		}
-		catch (const std::out_of_range& oor)
-		{
-			Logger::error("Failed to validate input file dimensions.", oor);
-		}
-		catch (const std::domain_error& de)
-		{
-			Logger::error("Failed to find best moves.", de);
-		}
-		catch (const std::ios::failure& iof)
-		{
-			Logger::error("Failed to open/close file: "
-					+ std::string(std::strerror(errno)), iof);
-		}
-		catch (const std::exception& e)
-		{
-			Logger::error("Solver has crashed.", e);
-		}
-	}
-}
+#pragma clang diagnostic pop

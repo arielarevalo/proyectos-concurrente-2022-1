@@ -6,7 +6,10 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
+
+using Point = std::pair<int, int>;
 
 /**
  * @brief A matrix of characters.
@@ -35,14 +38,14 @@ public:
 	 * @param i Row to get.
 	 * @return Row of character matrix.
 	 */
-	Row& operator[](size_t i);
+	T& operator[](const Point& p);
 
 	/**
 	 * @brief Gets constant matrix row at passed value.
 	 * @param i Row to get.
 	 * @return Constant row of character matrix.
 	 */
-	const Row& operator[](size_t i) const;
+	const T& operator[](const Point& p) const;
 
 	const size_t rows;
 	const size_t cols;
@@ -51,13 +54,13 @@ private:
 };
 
 template<typename T>
-typename Matrix<T>::Row& Matrix<T>::operator[](size_t i)
+T& Matrix<T>::operator[](const Point& p)
 {
-	return value[i];
+	return value[p.first][p.second];
 }
 
 template<typename T>
-const typename Matrix<T>::Row& Matrix<T>::operator[](size_t i) const
+const T& Matrix<T>::operator[](const Point& p) const
 {
-	return value[i];
+	return (*this)[p];
 }
