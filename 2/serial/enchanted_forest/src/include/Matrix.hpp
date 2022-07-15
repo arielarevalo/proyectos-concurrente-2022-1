@@ -14,11 +14,11 @@
 template<typename T>
 class Matrix
 {
+public:
 
 	using Row = std::vector<T>;
 	using Value = std::vector<Row>;
 
-public:
 	/**
 	 * @brief Constructs a matrix of characters of the specified dimensions.
 	 * @param rows Number of rows.
@@ -26,7 +26,7 @@ public:
 	 */
 	Matrix(size_t rows, size_t cols)
 			:rows(rows), cols(cols),
-			 value(rows, Row{ cols, NULL })
+			 value(rows, Row(cols))
 	{
 	}
 

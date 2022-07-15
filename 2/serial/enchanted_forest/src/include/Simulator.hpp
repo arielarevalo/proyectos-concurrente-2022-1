@@ -1,4 +1,5 @@
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>.
+// Copyright 2022 Pablo Madrigal Ramírez <pablo.madrigalramirez@ucr.ac.cr>.
 
 #pragma once
 
@@ -6,11 +7,9 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include "Filer.hpp"
-#include "GameState.hpp"
-#include "Manager.hpp"
-#include "Solver.hpp"
-#include "Logger.hpp"
+
+#include "./Logger.hpp"
+#include "./Map.hpp"
 
 /**
  * @brief Solves a given game state by finding the best moves and outputting
@@ -25,10 +24,23 @@ public:
  	 * optimal move, and generates the output files.
 	 * @param file Input game state file.
 	 */
-	static void solve(long numThreads, std::string path);
+	Map step(Map map);
 };
 
-void Simulator::solve(long numThreads, std::string path)
+void Simulator::step()
+{
+	for (size_t i{ 0 }; i < rows; i++)
+	{
+		for (size_t j{ 0 }; j < cols; j++)
+		{
+			Point current{ i, j };
+			getNextTerrain(current);
+		}
+	}
+	++time;
+}
+
+Map Simulator::step(Map map)
 {
 	Logger::setStart();
 
