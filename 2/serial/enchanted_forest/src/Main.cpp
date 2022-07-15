@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 
 		try
 		{
-			Simulator::solve(numThreads, path);
+			Simulator::step(Map(0, 0, 0, Matrix()));
 		}
 		catch (const std::exception& e)
 		{
