@@ -9,13 +9,12 @@
 #include "./Matrix.hpp"
 #include "./Terrain.hpp"
 
-using Point = std::pair<int, int>;
-
 class Map
 {
 public:
-	Map(size_t id, size_t rows, size_t cols, size_t time)
-			:id(id), rows(rows), cols(cols), time(time), area(rows, cols)
+	Map(const Map& source)
+			:id(source.id), rows(source.rows), cols(source.cols), time
+			(source.time + 1), area(rows, cols)
 	{
 	}
 
@@ -24,9 +23,9 @@ public:
 	{
 	}
 
-	Matrix<char>::Row& operator[](size_t i);
+	char& operator[](Point p);
 
-	char getNextTerrain(const Point& location);
+	[[nodiscard]] char getNextTerrain(const Point& location) const;
 
 	const size_t id;
 	const size_t rows;
@@ -53,8 +52,8 @@ private:
 			{ -1, -1 }
 	};
 
-	size_t
-	countNeighbors(const char& value, const Point& location, size_t limit);
+	[[nodiscard]] size_t countNeighbors(const char& value,
+			const Point& location, size_t limit) const;
 
 	const Point max{ rows - 1, cols - 1 };
 
@@ -76,15 +75,14 @@ bool operator<(const Point& l, const Point& r)
 	return l.first < r.first && l.second < r.second;
 }
 
-
-Matrix<char>::Row& Map::operator[](size_t i)
+char& Map::operator[](Point p)
 {
-	return area[i];
+	return area[p];
 }
 
-char Map::getNextTerrain(const Point& location)
+char Map::getNextTerrain(const Point& location) const
 {
-	switch (const char& value{ area[location.first][location.second] })
+	switch (const char& value{ area[location] })
 	{
 	case Terrain::tree:
 		if (countNeighbors(Terrain::lake, location, 4) > 3)
@@ -116,16 +114,15 @@ char Map::getNextTerrain(const Point& location)
 	}
 }
 
-size_t
-Map::countNeighbors(const char& value, const Point& location, size_t limit)
+size_t Map::countNeighbors(const char& value,
+		const Point& location, size_t limit) const
 {
 	size_t valueCount{ 0 };
 
 	for (const Point& p : scope)
 	{
 		Point next{ location + p };
-		if (next > min && next < max
-				&& area[next.first][next.second] == value)
+		if (next > min && next < max && area[next] == value)
 		{
 			++valueCount;
 			if (valueCount >= limit)
