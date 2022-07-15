@@ -1,4 +1,5 @@
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>.
+// Copyright 2022 Pablo Madrigal Ramírez <pablo.madrigalramirez@ucr.ac.cr>.
 
 #pragma once
 
@@ -10,8 +11,12 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
-#include "GameState.hpp"
-#include "PlayState.hpp"
+
+/*
+ *  Job Filer::toJob(std::ifstream& file) <-- job000.txt | (Filer::read())
+    Map Filer::toMap(std::ifstream& file) <-- map000.txt | (Filer::read())
+    void Filer::toFile(Map map, std::ofstream& file) --> map000-001.txt | (Filer::write())
+ * */
 
 /**
  * @brief Reads input file to game state and writes to output file with
@@ -39,6 +44,9 @@ public:
 	 * @param history List of ancestors of best play state.
 	 */
 	static void write(std::vector<PlayState>& history);
+
+
+
 };
 
 void Filer::initialize()
