@@ -18,7 +18,7 @@ public:
 	{
 	}
 
-	Map(size_t id, size_t rows, size_t cols, Matrix<char> area)
+	Map(std::string id, size_t rows, size_t cols, Matrix<char> area)
 			:id(id), rows(rows), cols(cols), area(std::move(area))
 	{
 	}
@@ -27,7 +27,7 @@ public:
 
 	[[nodiscard]] char getNextTerrain(const Point& location) const;
 
-	const size_t id;
+	const std::string id;
 	const size_t rows;
 	const size_t cols;
 	const size_t time{ 0 };
