@@ -5,9 +5,8 @@
 
 #include <string>
 
-#include "./Filer.hpp"
-#include "./Job.hpp"
 #include "./Logger.hpp"
+#include "./MapFiler.hpp"
 #include "./MapWriter.hpp"
 
 class EnchantedForest
@@ -24,32 +23,32 @@ void EnchantedForest::process(const std::string& jobPath)
 
 		try
 		{
-			Job job{ Filer::toJob(jobPath) };
+			MapFiler filer{ jobPath };
+			Job job{ filer.parseJob() };
 			Logger::info("Successfully read job from file " + jobPath);
 
 			Logger::info("Processing job maps.");
 			Logger::setStart();
-			for (const Map& m : job.maps)
+			for (const Map& m : job)
 			{
-				MapWriter writer{ m.id, m.area, m.finalTime };
+				MapWriter writer{ m.id, m.area, m.isTraced, m.finalTime };
 
 				while (writer.step())
 				{
-					Filer::toFile(writer.write(), job.outputPath);
+					filer.file(writer.write());
 				}
 				Logger::info(
-						"Successfully simulated "
-						+ std::to_string(m.finalTime) + " nights for"
-						+ " map" + std::to_string(m.id) + ".txt");
+						"Successfully simulated " + std::to_string(m.finalTime)
+								+ " nights for map " + std::to_string(m.id));
 			}
 		}
 		catch (const std::invalid_argument& ia)
 		{
-			Logger::error("Failed to validate input file values.", ia);
+			Logger::error("Failed to validate input file.", ia);
 		}
 		catch (const std::out_of_range& oor)
 		{
-			Logger::error("Failed to validate input file dimensions.", oor);
+			Logger::error("Failed to validate input file contents.", oor);
 		}
 		catch (const std::domain_error& de)
 		{

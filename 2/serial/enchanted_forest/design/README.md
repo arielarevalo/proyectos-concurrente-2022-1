@@ -1,4 +1,4 @@
-# Diseño Tetris Player
+# Diseño Enchanted Forest
 
 ## Requisitos
 
@@ -49,7 +49,7 @@
 
 ## Implementación
 
-Se parte de estructuras de datos `Job`, `Map` y `Matrix`.
+Se parte de estructuras de datos, `Map` y `Matrix`.
 
 El `EnchantedForest` recibe archivos `job` para el procesamiento de los
 archivos `map` descritos en su interior la cantidad de veces descrita junto
@@ -59,15 +59,14 @@ siguiente:
 
 | Clase     | Propósito                                                                           |
 |-----------|-------------------------------------------------------------------------------------|
-| Filer     | Validación de entradas. Conversión de archivo a `Job` y `Map` y de `Map` a archivo. |
+| MapFiler     | Validación de entradas. Conversión de archivo a `Job` y `Map` y de `Map` a archivo. |
 | MapWriter | Edita los objetos `Map`, avanzando una iteración a la vez.                          |
 | Logger    | Se encarga del logging a la consola.                                                |
-| Job       | Contiene la información necesaria para la ejecución de un trabajo completo.         |
 | Map       | Contiene la información de una iteración de un mapa.                                |
 | Matrix    | Representa el área de cada mapa en una matriz de caracteres.                        |
 | Terrain   | Contiene aliases para los caracteres a utilizar en el mapa.                         |
 
-### Filer
+### MapFiler
 
 El algoritmo de `filer` consiste en la lectura y escritura de los contenidos de
 un archivo por líneas. En el caso de lectura, las líneas son respectivamente
