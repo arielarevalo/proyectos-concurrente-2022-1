@@ -11,6 +11,8 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
+#include "Job.hpp"
+#include "Map.hpp"
 
 /*
  *  Job Filer::toJob(std::ifstream& file) <-- job000.txt | (Filer::read())
@@ -45,7 +47,11 @@ public:
 	 */
 	static void write(std::vector<PlayState>& history);
 
+    static Job toJob(std::ifstream& file);
 
+    static Map toMap(std::ifstream& file);
+
+    static void toFile(Map map, std::ofstream& file);
 
 };
 
@@ -53,6 +59,19 @@ void Filer::initialize()
 {
 	std::filesystem::remove_all(OUTPUT_PATH);
 	std::filesystem::create_directory(OUTPUT_PATH);
+}
+
+Job Filer::toJob(std::ifstream& file) {
+
+    std::string fileName((std::istreambuf_iterator<char>(file)),
+                    std::istreambuf_iterator<char>());
+
+    std::string inputPath {fileName};
+
+    std::string outputPath {fileName + "/output/"};
+
+
+
 }
 
 GameState Filer::read(std::ifstream& file)

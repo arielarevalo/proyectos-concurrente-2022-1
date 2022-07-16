@@ -7,11 +7,12 @@
 #include <utility>
 #include <string>
 #include <vector>
+#include "./Map.hpp"
 
 class Job {
 public :
 
-    Job(size_t id, std::string inputPath, std::string outputPath, std::vector<std::string> mapFiles)
+    Job(size_t id, std::string inputPath, std::string outputPath, std::vector<Map> mapFiles)
             : id(id), inputPath(inputPath), outputPath(outputPath), mapFiles(mapFiles) {}
 
     const size_t id;
@@ -20,6 +21,6 @@ public :
 
     const std::string outputPath;
 
-    const std::vector<std::string> mapFiles;
+    const std::vector<Map> mapFiles;
 };
 
