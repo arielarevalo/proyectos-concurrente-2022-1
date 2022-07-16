@@ -13,9 +13,11 @@
 class Terrain
 {
 public:
-    static constexpr char tree { 'a' };
+	static constexpr char tree{ 'a' };
 
-    static constexpr char lake { 'l' };
+	static constexpr char lake{ 'l' };
 
-    static constexpr char meadow { '-' };
+	static constexpr char meadow{ '-' };
+
+	static constexpr char legalChars[4]{ tree, lake, meadow, '\0' };
 };

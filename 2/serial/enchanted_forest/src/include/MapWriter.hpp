@@ -25,8 +25,9 @@ public:
 	{
 	}
 
-	MapWriter(size_t id, Matrix<char> area, size_t finalTime)
-			:source(new Map{ id, std::move(area), finalTime, START_TIME })
+	MapWriter(size_t id, Matrix<char> area, bool isTraced, size_t finalTime)
+			:source(new Map{ id, std::move(area), isTraced,
+							 finalTime, START_TIME })
 	{
 	}
 
