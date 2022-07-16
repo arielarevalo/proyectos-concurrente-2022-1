@@ -11,11 +11,15 @@
 #include <vector>
 #include <algorithm>
 #include <cstring>
-#include "Job.hpp"
+#include <regex>
 #include "Map.hpp"
 
+using Task = std::pair<Map, int>;
+
+using Job = std::vector<Task>;
+
 /*
- *  Job Filer::toJob(std::ifstream& file) <-- job000.txt | (Filer::read())
+ *  Job Filer::makeJob(std::ifstream& file) <-- job000.txt | (Filer::read())
     Map Filer::toMap(std::ifstream& file) <-- map000.txt | (Filer::read())
     void Filer::toFile(Map map, std::ofstream& file) --> map000-001.txt | (Filer::write())
 
@@ -31,95 +35,110 @@
  */
 class Filer {
 public:
-    //static constexpr char OUTPUT_PATH[7]{"./put/"};
+    Filer(const std::string &jobPath) :
+            jobPath(jobPath), inputPath(findInputPath(jobPath)), outputPath(inputPath + std::string(OUTPUT)) {}
 
-    static Job toJob(const std::string &path);
+    Job makeJob();
 
-    static Map toMap(const std::string &path, const int &midnight);
+    void toFile(Map map);
 
-    static void toFile(Map map, std::ofstream &file);
+private:
+    static constexpr size_t ID_START{3};
 
+    static constexpr size_t ID_SIZE{3};
+
+    static constexpr size_t FILENAME_SIZE{10};
+
+    static constexpr char OUTPUT[8]{"output/"};
+
+    static constexpr char JOB_REGEX[16]{"job[0-9]{3}.txt"};
+
+    static std::string findInputPath(const std::string &jobPath);
+
+    Map toMap(const std::string &filename, const int &midnight);
+
+    const std::string jobPath;
+
+    const std::string inputPath;
+
+    const std::string outputPath;
 };
 
-Job Filer::toJob(const std::string &path) {
 
-    std::ifstream file{path};
+Job Filer::makeJob() {
 
-    file.exceptions(
-            std::ifstream::badbit | std::ifstream::failbit);
-    try
-    {
-        std::string inputPath{path};
-
-        std::string outputPath{path + "/output/"};
-
-        std::vector<Map> mapFiles;
-        while (file) {
-            if (!file.eof()) {
-                std::string path;
-
-                int midnight{0};
-
-                file >> path;
-                file >> midnight;
-
-                Map map{ toMap(path, midnight) };
-                mapFiles.push_back(map);
-            } else {
-                break;
-            }
-        }
-
-        return {inputPath, outputPath, mapFiles};
-    }
-    catch (const std::exception& e)
-    {
-        throw;
-    }
-}
-
-Map Filer::toMap(const std::string &path, const int &midnight) {
-    std::ifstream file{path};
+    std::ifstream file{jobPath};
 
     file.exceptions(
             std::ifstream::badbit | std::ifstream::failbit);
-    try
-    {
-        const int time{midnight};
 
-        std::string id{path.substr(0, 5)};
-        size_t rows{0};
-        size_t cols{0};
-        file >> rows;
-        file >> cols;
+    Job job;
+    while (file) {
+        if (!file.eof()) {
+            std::string filename;
 
-        if (rows < 0 || cols < 0) {
-            throw std::out_of_range{"Input dimensions too small."};
+            int midnight{0};
+
+            file >> filename;
+
+            file >> midnight;
+
+            Map map{toMap(filename, midnight)};
+            job.emplace_back(map, midnight);
+        } else {
+            break;
         }
-
-        Matrix<char> area{rows, cols};
-
-        for (size_t i{0}; i < rows; ++i) {
-            file >> area[i];
-        }
-
-        return {id, rows, cols, area};
     }
-    catch (const std::exception& e)
-    {
-        throw;
-    }
+
+    return {job};
 }
 
-void Filer::toFile(Map map, std::ofstream &file)
-{
+Map Filer::toMap(const std::string &filename, const int &midnight) {
+    std::ifstream file{filename};
+
+    file.exceptions(
+            std::ifstream::badbit | std::ifstream::failbit);
+
+    const int time{midnight};
+
+    size_t id{ std::stoul(filename.substr(ID_START, ID_SIZE))  };
+    size_t rows{0};
+    size_t cols{0};
+    file >> rows;
+    file >> cols;
+
+    if (rows <= 0 || cols <= 0) {
+        throw std::out_of_range{"Input dimensions too small."};
+    }
+
+    Matrix<char> area{rows, cols};
+
+    for (size_t i{0}; i < rows; ++i) {
+        area[i] = file.get(char);
+    }
+
+    return {id, rows, cols, area};
+
+}
+
+void Filer::toFile(Map map) {
     //std::filesystem::create_directory(INITIAL_PATH);
 
-    std::string filename{ "../bin/put/" + map.id + "-"
-                          + std::to_string(map.time)
-                          + ".txt" };
+    std::string filename{"../bin/put/" + map.id + "-"
+                         + std::to_string(map.time)
+                         + ".txt"};
     file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
 
     file << map.time << std::endl;
     map.area.print(file);
+}
+
+std::string Filer::findInputPath(const std::string &jobPath) {
+    std::string jobFile{jobPath.substr(jobPath.size() - FILENAME_SIZE, FILENAME_SIZE)};
+
+    if (!std::regex_match(jobFile, std::regex(JOB_REGEX))) {
+        throw std::invalid_argument("Invalid job filename.");
+    }
+
+    return jobFile.substr(0, jobPath.size() - FILENAME_SIZE);
 }
