@@ -16,6 +16,8 @@
 #include <vector>
 
 #include "./Map.hpp"
+#include "./MapWriter.hpp"
+#include "./Terrain.hpp"
 
 using Job = std::vector<Map>;
 
@@ -135,15 +137,17 @@ Map MapFiler::parseMap(const std::string& task)
 		{
 			if (!file.eof())
 			{
-				Point current{ i, j };
-				file.get(area[current]);
-				if (std::string{ Terrain::legalChars }.find(area[current])
+				Point point{ i, j };
+				char& current{ area[point] };
+
+				file.get(current);
+				if (std::string{ Terrain::legalChars }.find(current)
 						== std::string::npos)
 				{
 					throw std::invalid_argument("Terrain at ("
-							+ std::to_string(current.first) + ","
-							+ std::to_string(current.second)
-							+ ") has an invalid value: " + value);
+							+ std::to_string(point.first) + ","
+							+ std::to_string(point.second)
+							+ ") has an invalid current: " + current);
 				}
 			}
 			else

@@ -7,7 +7,6 @@
 #include <utility>
 
 #include "./Matrix.hpp"
-#include "./MapWriter.hpp"
 
 class Map
 {

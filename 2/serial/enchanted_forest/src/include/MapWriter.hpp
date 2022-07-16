@@ -1,9 +1,6 @@
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>.
 // Copyright 2022 Pablo Madrigal Ramírez <pablo.madrigalramirez@ucr.ac.cr>.
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "readability-convert-member-functions-to-static"
-
 #pragma once
 
 #include <fstream>
@@ -171,5 +168,3 @@ Point MapWriter::max() const
 {
 	return { source->rows - 1, source->cols - 1 };
 }
-
-#pragma clang diagnostic pop
