@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <omp.h>
 
-#include "./include/Simulator.hpp"
+#include "./include/MapWriter.hpp"
 #include "./include/Logger.hpp"
 
 using namespace std;
@@ -28,11 +28,11 @@ int main(int argc, char* argv[])
 
 		try
 		{
-			Simulator::step(Map(0, 0, 0, Matrix()));
+			MapWriter::step();
 		}
 		catch (const std::exception& e)
 		{
-			Logger::error("Simulator has crashed.", e);
+			Logger::error("MapWriter has crashed.", e);
 		}
 		exit(1);
 	}

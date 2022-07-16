@@ -3,41 +3,45 @@
 
 #pragma once
 
-class EnchantedForest {
+#include <string>
+
+#include "./Filer.hpp"
+#include "./Job.hpp"
+#include "./Logger.hpp"
+#include "./MapWriter.hpp"
+
+class EnchantedForest
+{
 public:
-private:
+	static void process(const std::string& jobPath);
 };
 
-Map Simulator::step(Map map)
+void EnchantedForest::process(const std::string& jobPath)
 {
-	Logger::setStart();
-
-	if (!path.empty())
+	if (!jobPath.empty())
 	{
-		std::ifstream file{ path };
-
-		file.exceptions(
-				std::ifstream::badbit | std::ifstream::failbit);
+		Logger::info("Processing " + jobPath);
 
 		try
 		{
-			GameState initial{ Filer::read(file) };
-			Logger::info("Successfully read initial game state from file.");
+			Job job{ Filer::toJob(jobPath) };
+			Logger::info("Successfully read job from file " + jobPath);
 
-			// loop: mientras para este mapa en el job falten noches
-			// // map.step()
-			// // filer.write(map)
-
-
-			Logger::info("Finding best moves.");
-			Manager manager{ initial };
-
+			Logger::info("Processing job maps.");
 			Logger::setStart();
-			std::vector<PlayState> history{ manager.solveBestMoves() };
-			Logger::info("Successfully found best moves for game state.");
+			for (const Map& m : job.maps)
+			{
+				MapWriter writer{ m.id, m.area, m.finalTime };
 
-			Filer::write(history);
-			Logger::info("Successfully wrote best moves to files.");
+				while (writer.step())
+				{
+					Filer::toFile(writer.write(), job.outputPath);
+				}
+				Logger::info(
+						"Successfully simulated "
+						+ std::to_string(m.finalTime) + " nights for"
+						+ " map" + std::to_string(m.id) + ".txt");
+			}
 		}
 		catch (const std::invalid_argument& ia)
 		{
@@ -58,7 +62,7 @@ Map Simulator::step(Map map)
 		}
 		catch (const std::exception& e)
 		{
-			Logger::error("Solver has crashed.", e);
+			Logger::error("MapWriter has crashed.", e);
 		}
 	}
 }
