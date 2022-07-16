@@ -60,7 +60,7 @@ siguiente:
 | Clase     | Propósito                                                                           |
 |-----------|-------------------------------------------------------------------------------------|
 | Filer     | Validación de entradas. Conversión de archivo a `Job` y `Map` y de `Map` a archivo. |
-| Simulator | Edita los objetos `Map`, avanzando una iteración a la vez.                          |
+| MapWriter | Edita los objetos `Map`, avanzando una iteración a la vez.                          |
 | Logger    | Se encarga del logging a la consola.                                                |
 | Job       | Contiene la información necesaria para la ejecución de un trabajo completo.         |
 | Map       | Contiene la información de una iteración de un mapa.                                |
