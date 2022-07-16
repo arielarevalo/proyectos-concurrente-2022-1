@@ -22,8 +22,8 @@ public:
 	{
 	}
 
-	MapWriter(size_t id, Matrix<char> area, bool isTraced, size_t finalTime)
-			:source(new Map{ id, std::move(area), isTraced,
+	MapWriter(std::string id, Matrix<char> area, bool isTraced, size_t finalTime)
+			:source(new Map{ std::move(id), std::move(area), isTraced,
 							 finalTime, START_TIME })
 	{
 	}
@@ -90,8 +90,8 @@ bool MapWriter::step()
 
 	if (cont)
 	{
-		size_t rows{ source->rows };
-		size_t cols{ source->cols };
+		size_t rows{ source->area.rows };
+		size_t cols{ source->area.cols };
 		Matrix<char> destArea{ rows, cols };
 
 		for (size_t i{ 0 }; i < rows; i++)
@@ -166,5 +166,5 @@ size_t MapWriter::countNeighbors(const char& value,
 
 Point MapWriter::max() const
 {
-	return { source->rows - 1, source->cols - 1 };
+	return { source->area.rows - 1, source->area.cols - 1 };
 }

@@ -37,7 +37,7 @@ public:
 
 	Job parseJob();
 
-	void file(const Map& map);
+	void file(const Map& map) const;
 
 private:
 	static constexpr char DASH{ '-' };
@@ -90,7 +90,7 @@ Job MapFiler::parseJob()
 			std::ifstream::badbit | std::ifstream::failbit);
 
 	Job job;
-	while (file && !file.eof())
+	while (file && !(file>>std::ws).eof())
 	{
 		std::string task;
 		std::getline(file, task);
@@ -116,7 +116,7 @@ Map MapFiler::parseMap(const std::string& task)
 	file.exceptions(
 			std::ifstream::badbit | std::ifstream::failbit);
 
-	size_t id{ std::stoul(filename.substr(ID_START, ID_SIZE)) };
+	std::string id{ filename.substr(ID_START, ID_SIZE) };
 
 	size_t rows;
 	size_t cols;
@@ -135,7 +135,7 @@ Map MapFiler::parseMap(const std::string& task)
 	{
 		for (size_t j{ 0 }; j < cols; j++)
 		{
-			if (!file.eof())
+			if (!(file>>std::ws).eof())
 			{
 				Point point{ i, j };
 				char& current{ area[point] };
@@ -171,19 +171,19 @@ Map MapFiler::parseMap(const std::string& task)
 	return writer.write();
 }
 
-void MapFiler::file(const Map& map)
+void MapFiler::file(const Map& map) const
 {
 	std::string filename{
-			outputPath + MAP + std::to_string(map.id)
+			outputPath + MAP + map.id
 					+ DASH + std::to_string(map.currentTime) + TXT };
 
 	std::ofstream file{ filename };
 
 	file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
 
-	for (size_t i{ 0 }; i < map.rows; ++i)
+	for (size_t i{ 0 }; i < map.area.rows; ++i)
 	{
-		for (size_t j{ 0 }; j < map.cols; j++)
+		for (size_t j{ 0 }; j < map.area.cols; j++)
 		{
 			Point current{ i, j };
 			file << map.area[current];

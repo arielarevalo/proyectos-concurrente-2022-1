@@ -39,7 +39,7 @@ void EnchantedForest::process(const std::string& jobPath)
 				}
 				Logger::info(
 						"Successfully simulated " + std::to_string(m.finalTime)
-								+ " nights for map " + std::to_string(m.id));
+								+ " nights for map " + m.id);
 			}
 		}
 		catch (const std::invalid_argument& ia)
