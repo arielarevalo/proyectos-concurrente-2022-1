@@ -1,9 +1,6 @@
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>.
 // Copyright 2022 Pablo Madrigal Ramírez <pablo.madrigalramirez@ucr.ac.cr>.
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "readability-convert-member-functions-to-static"
-
 #pragma once
 
 #include <fstream>
@@ -25,8 +22,8 @@ public:
 	{
 	}
 
-	MapWriter(size_t id, Matrix<char> area, bool isTraced, size_t finalTime)
-			:source(new Map{ id, std::move(area), isTraced,
+	MapWriter(std::string id, Matrix<char> area, bool isTraced, size_t finalTime)
+			:source(new Map{ std::move(id), std::move(area), isTraced,
 							 finalTime, START_TIME })
 	{
 	}
@@ -38,7 +35,7 @@ public:
 private:
 	static constexpr size_t START_TIME{ 0 };
 
-	static constexpr Point min{ 0, 0 };
+	static constexpr Point min{ -1, -1 };
 
 	static constexpr Point scope[8]{
 			{ -1, 0 },
@@ -93,8 +90,8 @@ bool MapWriter::step()
 
 	if (cont)
 	{
-		size_t rows{ source->rows };
-		size_t cols{ source->cols };
+		size_t rows{ source->area.rows };
+		size_t cols{ source->area.cols };
 		Matrix<char> destArea{ rows, cols };
 
 		for (size_t i{ 0 }; i < rows; i++)
@@ -169,7 +166,5 @@ size_t MapWriter::countNeighbors(const char& value,
 
 Point MapWriter::max() const
 {
-	return { source->rows - 1, source->cols - 1 };
+	return { source->area.rows, source->area.cols };
 }
-
-#pragma clang diagnostic pop

@@ -62,5 +62,5 @@ T& Matrix<T>::operator[](const Point& p)
 template<typename T>
 const T& Matrix<T>::operator[](const Point& p) const
 {
-	return (*this)[p];
+	return value[p.first][p.second];
 }

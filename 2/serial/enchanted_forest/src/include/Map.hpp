@@ -7,16 +7,13 @@
 #include <utility>
 
 #include "./Matrix.hpp"
-#include "./MapWriter.hpp"
 
 class Map
 {
 public:
 	friend class MapWriter;
 
-	const size_t id;
-	const size_t rows;
-	const size_t cols;
+	const std::string id;
 	const Matrix<char> area;
 	const bool isTraced;
 	const size_t finalTime;
@@ -29,9 +26,9 @@ private:
 	{
 	}
 
-	Map(size_t id, Matrix<char> area, bool isTraced,
+	Map(std::string id, Matrix<char> area, bool isTraced,
 			size_t finalTime, size_t currentTime)
-			:id(id), rows(area.rows), cols(area.cols), area(std::move(area)),
+			:id(std::move(id)), area(std::move(area)),
 			 isTraced(isTraced), finalTime(finalTime), currentTime(currentTime)
 	{
 	}

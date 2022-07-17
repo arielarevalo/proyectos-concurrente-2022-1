@@ -16,6 +16,8 @@
 #include <vector>
 
 #include "./Map.hpp"
+#include "./MapWriter.hpp"
+#include "./Terrain.hpp"
 
 using Job = std::vector<Map>;
 
@@ -29,22 +31,24 @@ public:
 	explicit MapFiler(const std::string& jobPath)
 			:
 			jobPath(jobPath), inputPath(parseInputPath(jobPath)),
-			outputPath(inputPath + OUTPUT)
+			outputPath(parseOutputPath(jobPath))
 	{
 	}
 
 	Job parseJob();
 
-	void file(const Map& map);
+	void file(const Map& map) const;
 
 private:
 	static constexpr char DASH{ '-' };
+
+	static constexpr char SLASH{ '/' };
 
 	static constexpr char MAP[4]{ "map" };
 
 	static constexpr char TXT[5]{ ".txt" };
 
-	static constexpr char OUTPUT[8]{ "output/" };
+	static constexpr char OUTPUT[8]{ "output" };
 
 	static constexpr char JOB_REGEX[16]{ "job[0-9]{3}.txt" };
 
@@ -57,6 +61,8 @@ private:
 	static constexpr size_t ID_SIZE{ 3 };
 
 	static std::string parseInputPath(const std::string& jobPath);
+
+	static std::string parseOutputPath(const std::string& jobPath);
 
 	Map parseMap(const std::string& task);
 
@@ -80,6 +86,17 @@ std::string MapFiler::parseInputPath(const std::string& jobPath)
 	return jobPath.substr(0, jobPath.size() - FILENAME_SIZE);
 }
 
+std::string MapFiler::parseOutputPath(const std::string& jobPath)
+{
+	std::string inputPath{ parseInputPath(jobPath) };
+
+	std::string directory{
+			jobPath.substr(jobPath.size() - FILENAME_SIZE,
+					FILENAME_SIZE - std::string{TXT}.size()) };
+
+	return inputPath + directory + SLASH;
+}
+
 Job MapFiler::parseJob()
 {
 	std::ifstream file{ jobPath };
@@ -88,7 +105,7 @@ Job MapFiler::parseJob()
 			std::ifstream::badbit | std::ifstream::failbit);
 
 	Job job;
-	while (file && !file.eof())
+	while (file && !(file >> std::ws).eof())
 	{
 		std::string task;
 		std::getline(file, task);
@@ -114,7 +131,7 @@ Map MapFiler::parseMap(const std::string& task)
 	file.exceptions(
 			std::ifstream::badbit | std::ifstream::failbit);
 
-	size_t id{ std::stoul(filename.substr(ID_START, ID_SIZE)) };
+	std::string id{ filename.substr(ID_START, ID_SIZE) };
 
 	size_t rows;
 	size_t cols;
@@ -133,17 +150,19 @@ Map MapFiler::parseMap(const std::string& task)
 	{
 		for (size_t j{ 0 }; j < cols; j++)
 		{
-			if (!file.eof())
+			if (!(file >> std::ws).eof())
 			{
-				Point current{ i, j };
-				file.get(area[current]);
-				if (std::string{ Terrain::legalChars }.find(area[current])
+				Point point{ i, j };
+				char& current{ area[point] };
+
+				file.get(current);
+				if (std::string{ Terrain::legalChars }.find(current)
 						== std::string::npos)
 				{
 					throw std::invalid_argument("Terrain at ("
-							+ std::to_string(current.first) + ","
-							+ std::to_string(current.second)
-							+ ") has an invalid value: " + value);
+							+ std::to_string(point.first) + ","
+							+ std::to_string(point.second)
+							+ ") has an invalid current: " + current);
 				}
 			}
 			else
@@ -167,23 +186,28 @@ Map MapFiler::parseMap(const std::string& task)
 	return writer.write();
 }
 
-void MapFiler::file(const Map& map)
+void MapFiler::file(const Map& map) const
 {
-	std::string filename{
-			outputPath + MAP + std::to_string(map.id)
-					+ DASH + std::to_string(map.currentTime) + TXT };
-
-	std::ofstream file{ filename };
-
-	file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
-
-	for (size_t i{ 0 }; i < map.rows; ++i)
+	if (map.isTraced || map.currentTime == map.finalTime)
 	{
-		for (size_t j{ 0 }; j < map.cols; j++)
+		std::filesystem::create_directory(outputPath);
+
+		std::string filename{
+				outputPath + MAP + map.id
+						+ DASH + std::to_string(map.currentTime) + TXT };
+
+		std::ofstream file{ filename };
+
+		file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
+
+		for (size_t i{ 0 }; i < map.area.rows; ++i)
 		{
-			Point current{ i, j };
-			file << map.area[current];
+			for (size_t j{ 0 }; j < map.area.cols; j++)
+			{
+				Point current{ i, j };
+				file << map.area[current];
+			}
+			file << std::endl;
 		}
-		file << std::endl;
 	}
 }
