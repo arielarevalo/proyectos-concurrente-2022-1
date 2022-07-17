@@ -31,7 +31,7 @@ public:
 	explicit MapFiler(const std::string& jobPath)
 			:
 			jobPath(jobPath), inputPath(parseInputPath(jobPath)),
-			outputPath(inputPath + OUTPUT)
+			outputPath(parseOutputPath(jobPath))
 	{
 	}
 
@@ -42,11 +42,13 @@ public:
 private:
 	static constexpr char DASH{ '-' };
 
+	static constexpr char SLASH{ '/' };
+
 	static constexpr char MAP[4]{ "map" };
 
 	static constexpr char TXT[5]{ ".txt" };
 
-	static constexpr char OUTPUT[8]{ "output/" };
+	static constexpr char OUTPUT[8]{ "output" };
 
 	static constexpr char JOB_REGEX[16]{ "job[0-9]{3}.txt" };
 
@@ -59,6 +61,8 @@ private:
 	static constexpr size_t ID_SIZE{ 3 };
 
 	static std::string parseInputPath(const std::string& jobPath);
+
+	static std::string parseOutputPath(const std::string& jobPath);
 
 	Map parseMap(const std::string& task);
 
@@ -82,6 +86,17 @@ std::string MapFiler::parseInputPath(const std::string& jobPath)
 	return jobPath.substr(0, jobPath.size() - FILENAME_SIZE);
 }
 
+std::string MapFiler::parseOutputPath(const std::string& jobPath)
+{
+	std::string inputPath{ parseInputPath(jobPath) };
+
+	std::string directory{
+			jobPath.substr(jobPath.size() - FILENAME_SIZE,
+					FILENAME_SIZE - std::string{TXT}.size()) };
+
+	return inputPath + directory + SLASH;
+}
+
 Job MapFiler::parseJob()
 {
 	std::ifstream file{ jobPath };
@@ -90,7 +105,7 @@ Job MapFiler::parseJob()
 			std::ifstream::badbit | std::ifstream::failbit);
 
 	Job job;
-	while (file && !(file>>std::ws).eof())
+	while (file && !(file >> std::ws).eof())
 	{
 		std::string task;
 		std::getline(file, task);
@@ -135,7 +150,7 @@ Map MapFiler::parseMap(const std::string& task)
 	{
 		for (size_t j{ 0 }; j < cols; j++)
 		{
-			if (!(file>>std::ws).eof())
+			if (!(file >> std::ws).eof())
 			{
 				Point point{ i, j };
 				char& current{ area[point] };
@@ -173,21 +188,26 @@ Map MapFiler::parseMap(const std::string& task)
 
 void MapFiler::file(const Map& map) const
 {
-	std::string filename{
-			outputPath + MAP + map.id
-					+ DASH + std::to_string(map.currentTime) + TXT };
-
-	std::ofstream file{ filename };
-
-	file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
-
-	for (size_t i{ 0 }; i < map.area.rows; ++i)
+	if (map.isTraced || map.currentTime == map.finalTime)
 	{
-		for (size_t j{ 0 }; j < map.area.cols; j++)
+		std::filesystem::create_directory(outputPath);
+
+		std::string filename{
+				outputPath + MAP + map.id
+						+ DASH + std::to_string(map.currentTime) + TXT };
+
+		std::ofstream file{ filename };
+
+		file.exceptions(std::ofstream::badbit | std::ifstream::failbit);
+
+		for (size_t i{ 0 }; i < map.area.rows; ++i)
 		{
-			Point current{ i, j };
-			file << map.area[current];
+			for (size_t j{ 0 }; j < map.area.cols; j++)
+			{
+				Point current{ i, j };
+				file << map.area[current];
+			}
+			file << std::endl;
 		}
-		file << std::endl;
 	}
 }
