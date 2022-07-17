@@ -31,7 +31,7 @@ void EnchantedForest::process(const std::string& jobPath)
 			Logger::setStart();
 			for (const Map& m : job)
 			{
-				MapWriter writer{ m.id, m.area, m.isTraced, m.finalTime };
+				MapWriter writer{ m };
 
 				while (writer.step())
 				{

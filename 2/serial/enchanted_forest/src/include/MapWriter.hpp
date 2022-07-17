@@ -35,7 +35,7 @@ public:
 private:
 	static constexpr size_t START_TIME{ 0 };
 
-	static constexpr Point min{ 0, 0 };
+	static constexpr Point min{ -1, -1 };
 
 	static constexpr Point scope[8]{
 			{ -1, 0 },
@@ -166,5 +166,5 @@ size_t MapWriter::countNeighbors(const char& value,
 
 Point MapWriter::max() const
 {
-	return { source->area.rows - 1, source->area.cols - 1 };
+	return { source->area.rows, source->area.cols };
 }
