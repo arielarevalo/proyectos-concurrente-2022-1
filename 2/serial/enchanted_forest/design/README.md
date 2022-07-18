@@ -76,3 +76,9 @@ basado en la especificación del archivo de entrada y el número de filas del
 área de juego ASCII contenida en el mismo. Además, para el caso de escritura, se
 lleva a cabo la necesaria funcionalidad de conversión de `PlayState` a
 archivo a través de un proceso idéntico, pero inverso, al de lectura.
+
+### Diagramas
+
+![Diagrama UML](uml.svg)
+
+![Diagrama de Flujo](flowchart.svg)
