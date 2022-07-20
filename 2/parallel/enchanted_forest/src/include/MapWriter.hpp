@@ -4,6 +4,7 @@
 #pragma once
 
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -22,7 +23,8 @@ public:
 	{
 	}
 
-	MapWriter(std::string id, Matrix<char> area, bool isTraced, size_t finalTime)
+	MapWriter(std::string id, Matrix<char> area, bool isTraced,
+			size_t finalTime)
 			:source(new Map{ std::move(id), std::move(area), isTraced,
 							 finalTime, START_TIME })
 	{
@@ -94,9 +96,10 @@ bool MapWriter::step()
 		size_t cols{ source->area.cols };
 		Matrix<char> destArea{ rows, cols };
 
-		for (size_t i{ 0 }; i < rows; i++)
+#pragma omp parallel for collapse(2) schedule(static, 1)
+		for (size_t i = 0; i < rows; i++)
 		{
-			for (size_t j{ 0 }; j < cols; j++)
+			for (size_t j = 0; j < cols; j++)
 			{
 				Point current{ i, j };
 				char next{ nextTerrain(current) };

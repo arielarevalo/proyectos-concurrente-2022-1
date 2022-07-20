@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 project(enchanted_forest)
+find_package(OpenMP REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
-set (CMAKE_CXX_COMPILER clang++)
+set (CMAKE_CXX_COMPILER g++)
 set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCES_DIR ./src)
@@ -10,6 +11,7 @@ set(INCLUDE_DIR ${SOURCES_DIR}/include)
 set(TARGET_SOURCES ${SOURCES_DIR}/Main.cpp)
 
 include_directories(${INCLUDE_DIR})
+link_libraries(OpenMP::OpenMP_CXX)
 
 set(DEFAULT_TARGET ${CMAKE_PROJECT_NAME})
 set(ASAN_TARGET ${DEFAULT_TARGET}_asan)
