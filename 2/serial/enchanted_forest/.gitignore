@@ -2,7 +2,8 @@
 bin/
 build/
 cmake-build-debug/
-test/test_set_2
+test/test_set_2/
+test/test_set_1/job001/
 
 # Prerequisites
 *.d
