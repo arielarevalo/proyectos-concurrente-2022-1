@@ -1,104 +1,81 @@
-[Reporte](../report/README.md)
+# Enchanted Forest
 
-# Tetris Solver
+Este proyecto consiste en un programa capaz de procesar un archivo job el cual 
+contiene una lista de archivos map, por procesar. Cada map consiste en una 
+matriz de caracteres que representan un cuadro de un mapa que detalla un 
+bosque encantado. El mapa del bosque se procesa de acuerdo a las siguientes 
+reglas:
 
-Este proyecto consiste en un programa capaz de resolver una jugada de
-Tetris, con el problema enunciado de la siguiente forma:
+Cada medianoche el bosque cambia, y al día siguiente los ciudadanos 
+encuentran un lugar diferente para recrearse. El terreno del bosque cambia 
+de acuerdo a uno de los siguientes casos:
 
-> Dado un estado inicial de área de juego, profundidad por consultar, y
-> formas de Tetris próximas por ubicar, hallar la permutación entre las
-> posibles ubicaciones y orientaciones válidas para cada forma siguiente de
-> tal forma que se maximice el puntaje obtenido.
+* Inundación: Si la celda tiene un árbol y al menos 4 vecinos que son lago 
+  encantado, entonces el lago ahoga el árbol, y pasa a ser lago encantado.
+* Sequía: Si la celda es lago encantado y tiene menos de 3 vecinos que sean 
+  lago encantado, entonces el lago se seca y pasa a ser pradera.
+* Reforestación: Si la celda es pradera y tiene al menos 3 vecinos árboles, 
+  las semillas tendrán espacio para crecer y la celda se convierte en árbol.
+* Hacinamiento: Si la celda es un árbol y tiene más de 4 vecinos árbol, el 
+  exceso de sombra evita que crezca y entonces pasa a ser pradera.
+* Estabilidad: Cualquier otra situación, la celda permanece como está.
 
-O dicho de otra forma, el programa recibe un archivo con un estado de juego
-inicial, lo cual consiste en un número de identificación, una cantidad de
-próximas piezas por las cuales consultar, las dimensiones y la matriz que
-representan el área de juego, y una serie de piezas siguientes las cuales
-intentar agregar al área de juego. El programa prueba todas las maneras en
-que estas piezas se pueden agregar al área de juego, en el orden en que se
-escriben en el archivo, y devuelve una serie de archivos que detallan los
-movimientos que dan la mayor cantidad de puntos.
+Para decidir cuantas noches procesar un mapa, cada línea del job contiene 
+tanto el nombre del archivo map por procesar, así como el número de noches. 
+Si el número es positivo, el programa debe producir un archivo con el 
+estado del mapa en cada amanecer. Cuando el número de noches es negativo, 
+el programa debe aplicar las reglas mágicas esa cantidad de noches, y producir 
+como salida un único archivo con el mapa resultante después de la última 
+medianoche.
 
 ## Instrucciones de uso
 
 Primeramente, debemos saber como espera el programa su archivo de entrada.
-Además de la descripción anterior, mostramos un ejemplo de un archivo de
+Además de la descripción anterior, mostramos un ejemplo de un archivo job de
 entrada seguidamente:
 
 ```
-tetris_state.txt
+job001.txt
 
-1650259796944
-1
-20
-10
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0001111000
-0000040000
-0004440000
-0000700000
-0007770000
-0002200000
-0020220000
-0220066000
-0777742240
-7
-I
-Z
-I
-J
-S
-L
-S
+map001.txt 2
+map002.txt -100
+map003.txt -20000
 ```
 
-Con un archivo de entrada a la mano procedemos a compilar el
-programa con el comando `cmake`, y podemos correrlo ejecutando
-`./tetris_player [Dirección de archivo] [Número de hilos]`. Seguidamente, se
-estarán almacenando en el directorio `put` los archivos que representan las
-movidas las cuales hacer para obtener la mayor cantidad de puntos, o se 
-devolverá por consola un mensaje indicando que no se puede completar el 
-juego solicitado a la profundidad solicitada. Como ejemplo de archivo de 
+La carpeta donde se encuentra el archivo job debe contener todos los mapas 
+por procesar para ese job. Mostramos, entonces, un ejemplo de un archivo map:
+
+```
+map001.txt
+
+7 7
+-------
+-l--l--
+-ll---- 
+-l----- 
+---laa- 
+-aa-al-
+a-a----
+```
+
+Con un archivo job de entrada y sus respectivos maps a la mano procedemos a 
+compilar el programa con el comando `cmake`, y podemos correrlo ejecutando
+`./enchanted_forest [Dirección de archivo]`. Seguidamente, se
+estará almacenando en el directorio donde se encuentra el archivo job un 
+directorio con el nombre del archivo job, el cual contiene los maps 
+procesados solicitados dentro del archivo job. Como ejemplo de archivo de 
 salida, se presenta el siguiente:
 
 ```
-tetris_play_0.txt
+map001-1.txt
 
-1650259796944
-I
-1
-20
-10
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0000000000
-0001111000
-0000040000
-0004440000
-0000700000
-0007770000
-1002200000
-1020220000
-1220066000
-1777742240
+-------
+-------
+-ll----
+-------
+----aa-
+-aaaa--
+aaaa---
 ```
 
 ## [Diseño](./design/README.md)
@@ -106,4 +83,5 @@ I
 ## Créditos
 
 El programa fue desarrollado en su totalidad por Ariel Arévalo Alvarado
-(<ariel.arevalo@ucr.ac.cr>)
+(<ariel.arevalo@ucr.ac.cr>) y Pablo Madrigal Ramírez (<pablo.
+madrigalramirez@ucr.ac.cr>).
