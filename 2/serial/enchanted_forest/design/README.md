@@ -59,7 +59,7 @@ siguiente:
 
 | Clase     | Propósito                                                                           |
 |-----------|-------------------------------------------------------------------------------------|
-| MapFiler     | Validación de entradas. Conversión de archivo a `Job` y `Map` y de `Map` a archivo. |
+| MapFiler  | Validación de entradas. Conversión de archivo a `Job` y `Map` y de `Map` a archivo. |
 | MapWriter | Edita los objetos `Map`, avanzando una iteración a la vez.                          |
 | Logger    | Se encarga del logging a la consola.                                                |
 | Map       | Contiene la información de una iteración de un mapa.                                |
@@ -68,14 +68,29 @@ siguiente:
 
 ### MapFiler
 
-El algoritmo de `filer` consiste en la lectura y escritura de los contenidos de
-un archivo por líneas. En el caso de lectura, las líneas son respectivamente
-convertidas en las variables de un `GameState` para la construcción del
-mismo. Esto se lleva a cabo a través de un número de ejecuciones de `cin`
-basado en la especificación del archivo de entrada y el número de filas del
-área de juego ASCII contenida en el mismo. Además, para el caso de escritura, se
-lleva a cabo la necesaria funcionalidad de conversión de `PlayState` a
-archivo a través de un proceso idéntico, pero inverso, al de lectura.
+Un `MapFiler` consiste en un objeto que designa las operaciones de 
+interacción con el sistema de archivos para un job dado. Cuenta con 
+funciones `parseJob` y `file` en su interfaz pública. La primera devuelve un 
+vector de `Map` en representación del contenido del archivo job. La segunda 
+guarda en el sistema de archivos las representaciones de cada mapa generado 
+haciendo uso de la información de sistema de archivos del archivo job.
+
+### MapWriter
+
+Un `MapWriter` consiste en un objeto que genera o modifica un `Map` dado. Se 
+utiliza principalmente para generar el descendiente de un mapa. Cuenta con
+funciones `write` y `step` en su interfaz pública. La primera devuelve una 
+copia del mapa actualmente administrado por el writer. La segunda avanza en 
+una iteración el estado de la matriz de área del mapa administrado.
+
+### Map
+
+Un `Map` consiste en un objeto que representa una unidad de trabajo para 
+cualquier estado de mapa por utilizar en el transcurso de la simulación. 
+Indica tanto el número de iteraciones que han sido procesadas, así como el 
+número total de iteraciones por ser procesadas, eso además de guardar la 
+información sobre si el linaje representado por objeto requiere trazabilidad 
+en sus salidas, o no.
 
 ### Diagramas
 
