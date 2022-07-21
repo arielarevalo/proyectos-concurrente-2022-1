@@ -107,6 +107,7 @@ Job MapFiler::parseJob()
 	Job job;
 	while (file && !(file >> std::ws).eof())
 	{
+		// TODO(aarevalo): Figure out how to read number of lines and self map.
 		std::string task;
 		std::getline(file, task);
 
