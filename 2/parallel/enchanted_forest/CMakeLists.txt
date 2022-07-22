@@ -4,6 +4,7 @@ find_package(MPI REQUIRED)
 find_package(OpenMP REQUIRED)
 
 set(CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_COMPILER g++)
 set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCES_DIR ./src)
