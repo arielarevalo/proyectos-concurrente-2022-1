@@ -20,28 +20,16 @@ using std::exception;
  */
 int main(int argc, char* argv[])
 {
-	try
-	{
-		if (argc < 2)
-		{
-			throw invalid_argument("No path provided.");
-		}
-
-	}
-	catch (invalid_argument& ia)
-	{
-		Logger::error("Invalid number of arguments", ia);
-
-		exit(1);
-	}
-
-	// TODO(aarevalo): if arg path is relative -> absolute(const
-	//  std::filesystem::path& p) and overwrite argv[2]. Else, nothing
-
 	if (MPI_Init(&argc, &argv) == MPI_SUCCESS)
 	{
+		Logger::initialize();
 		try
 		{
+			if (argc < 2)
+			{
+				throw invalid_argument("No path provided.");
+			}
+
 			int numThreads{ static_cast<int>(sysconf(_SC_NPROCESSORS_ONLN)) };
 
 			string path{ argv[1] };
@@ -62,6 +50,12 @@ int main(int argc, char* argv[])
 
 			EnchantedForest::process(path);
 		}
+		catch (invalid_argument& ia)
+		{
+			Logger::error("Invalid arguments", ia);
+
+			exit(1);
+		}
 		catch (exception& e)
 		{
 			Logger::error("EnchantedForest has crashed.", e);
@@ -71,7 +65,7 @@ int main(int argc, char* argv[])
 	{
 		Logger::error("MPI could not initialize.");
 	}
-
+	Logger::finalize();
 	MPI_Finalize();
 
 	exit(0);
