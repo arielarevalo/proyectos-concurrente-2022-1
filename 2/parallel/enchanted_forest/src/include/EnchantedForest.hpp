@@ -17,30 +17,33 @@ public:
 
 void EnchantedForest::process(const std::string& jobPath)
 {
+    Logger::setStart();
 	if (!jobPath.empty())
 	{
 		Logger::info("Processing " + jobPath);
 
 		try
 		{
-			MapFiler filer{ jobPath };
-			Job job{ filer.parseJob() };
-			Logger::info("Successfully read job from file " + jobPath);
+            MapFiler filer{ jobPath };
+            Job job{ filer.parseJob() };
+            Logger::info("Successfully read job from file " + jobPath);
 
-			Logger::info("Processing job maps.");
-			Logger::setStart();
-			for (const Map& m : job)
-			{
-				MapWriter writer{ m };
+            Logger::info("Processing job maps.");
+            for (const std::string& task : job)
+            {
+                Map map{ filer.parseMap(task) };
 
-				while (writer.step())
-				{
-					filer.file(writer.write());
-				}
-				Logger::info(
-						"Successfully simulated " + std::to_string(m.finalTime)
-								+ " nights for map " + m.id);
-			}
+                MapWriter writer{ map };
+
+                while (writer.step())
+                {
+                    filer.file(writer.write());
+                }
+                Logger::info(
+                        "Successfully simulated "
+                        + std::to_string(map.finalTime)
+                        + " nights for map " + map.id);
+            }
 		}
 		catch (const std::invalid_argument& ia)
 		{
