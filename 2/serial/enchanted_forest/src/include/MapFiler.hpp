@@ -19,7 +19,7 @@
 #include "./MapWriter.hpp"
 #include "./Terrain.hpp"
 
-using Job = std::vector<Map>;
+using Job = std::vector<std::string>;
 
 /**
  * @brief Reads input file to game state and writes to output file with
@@ -36,6 +36,8 @@ public:
 	}
 
 	Job parseJob();
+
+	Map parseMap(const std::string& task);
 
 	void file(const Map& map) const;
 
@@ -63,8 +65,6 @@ private:
 	static std::string parseInputPath(const std::string& jobPath);
 
 	static std::string parseOutputPath(const std::string& jobPath);
-
-	Map parseMap(const std::string& task);
 
 	const std::string jobPath;
 
@@ -109,9 +109,7 @@ Job MapFiler::parseJob()
 	{
 		std::string task;
 		std::getline(file, task);
-
-		Map map{ parseMap(task) };
-		job.push_back(map);
+		job.push_back(task);
 	}
 
 	return job;
