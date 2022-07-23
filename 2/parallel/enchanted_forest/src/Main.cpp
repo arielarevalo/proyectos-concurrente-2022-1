@@ -1,8 +1,9 @@
 // Copyright 2022 Ariel Arevalo Alvarado <ariel.arevalo@ucr.ac.cr>.
 // Copyright 2022 Pablo Madrigal Ramírez <pablo.madrigalramirez@ucr.ac.cr>.
 
-#include <unistd.h>
+#include <mpi.h>
 #include <omp.h>
+#include <unistd.h>
 #include <string>
 
 #include "./include/EnchantedForest.hpp"
@@ -19,39 +20,54 @@ using std::exception;
  */
 int main(int argc, char* argv[])
 {
-	int numThreads{ static_cast<int>(sysconf(_SC_NPROCESSORS_ONLN)) };
-
-	try
+	if (MPI_Init(&argc, &argv) == MPI_SUCCESS)
 	{
-		if (argc < 2)
+		Logger::initialize();
+		try
 		{
-			throw invalid_argument("No path provided.");
+			if (argc < 2)
+			{
+				throw invalid_argument("No path provided.");
+			}
+
+			int numThreads{ static_cast<int>(sysconf(_SC_NPROCESSORS_ONLN)) };
+
+			string path{ argv[1] };
+
+			if (argc > 2)
+			{
+				try
+				{
+					numThreads = stoi(argv[2]);
+				}
+				catch (out_of_range& oor)
+				{
+					Logger::error("Invalid number of threads", oor);
+				}
+			}
+
+			omp_set_num_threads(numThreads);
+
+			EnchantedForest::process(path);
 		}
-
-		string path{ argv[1] };
-
-		if (argc > 2)
+		catch (invalid_argument& ia)
 		{
-			numThreads = stoi(argv[2]);
+			Logger::error("Invalid arguments", ia);
+
+			exit(1);
 		}
-
-		omp_set_num_threads(numThreads);
-
-		EnchantedForest::process(path);
-
-		exit(0);
+		catch (exception& e)
+		{
+			Logger::error("EnchantedForest has crashed.", e);
+		}
 	}
-	catch (out_of_range& oor)
+	else
 	{
-		Logger::error("Invalid number of threads", oor);
+		Logger::error("MPI could not initialize.");
 	}
-	catch (invalid_argument& ia)
-	{
-		Logger::error("Invalid number of arguments", ia);
-	}
-	catch (exception& e)
-	{
-		Logger::error("EnchantedForest has crashed.", e);
-	}
-	exit(1);
+	MPI_Finalize();
+
+	Logger::print("Finished.");
+
+	exit(0);
 }

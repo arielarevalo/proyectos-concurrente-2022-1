@@ -40,6 +40,8 @@ public:
 	void file(const Map& map) const;
 
 private:
+	static constexpr int ROOT_RANK{ 0 };
+
 	static constexpr char DASH{ '-' };
 
 	static constexpr char SLASH{ '/' };
@@ -63,6 +65,9 @@ private:
 	static std::string parseInputPath(const std::string& jobPath);
 
 	static std::string parseOutputPath(const std::string& jobPath);
+
+	static std::vector<std::string>
+	parseMyTasks(std::vector<std::string>& allTasks);
 
 	Map parseMap(const std::string& task);
 
@@ -92,25 +97,42 @@ std::string MapFiler::parseOutputPath(const std::string& jobPath)
 
 	std::string directory{
 			jobPath.substr(jobPath.size() - FILENAME_SIZE,
-					FILENAME_SIZE - std::string{TXT}.size()) };
+					FILENAME_SIZE - std::string{ TXT }.size()) };
 
 	return inputPath + directory + SLASH;
 }
 
 Job MapFiler::parseJob()
 {
+	int rank{ -1 };
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	if (rank == ROOT_RANK)
+	{
+		std::filesystem::remove_all(outputPath);
+		std::filesystem::create_directory(outputPath);
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+
 	std::ifstream file{ jobPath };
 
 	file.exceptions(
 			std::ifstream::badbit | std::ifstream::failbit);
 
-	Job job;
+	std::vector<std::string> allTasks{};
 	while (file && !(file >> std::ws).eof())
 	{
 		std::string task;
 		std::getline(file, task);
+		allTasks.push_back(task);
+	}
 
-		Map map{ parseMap(task) };
+	std::vector<std::string> myTasks{ parseMyTasks(allTasks) };
+
+	Job job;
+	for (std::string t : myTasks)
+	{
+		Map map{ parseMap(t) };
 		job.push_back(map);
 	}
 
@@ -190,8 +212,6 @@ void MapFiler::file(const Map& map) const
 {
 	if (map.isTraced || map.currentTime == map.finalTime)
 	{
-		std::filesystem::create_directory(outputPath);
-
 		std::string filename{
 				outputPath + MAP + map.id
 						+ DASH + std::to_string(map.currentTime) + TXT };
@@ -210,4 +230,35 @@ void MapFiler::file(const Map& map) const
 			file << std::endl;
 		}
 	}
+}
+
+std::vector<std::string>
+MapFiler::parseMyTasks(std::vector<std::string>& allTasks)
+{
+	int rank{ -1 };
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	int processCount{ -1 };
+	MPI_Comm_size(MPI_COMM_WORLD, &processCount);
+
+	size_t remainder{ 0 };
+	size_t taskCount{ allTasks.size() };
+	remainder = taskCount % static_cast<size_t>(processCount);
+
+	size_t mapsPerProcess{ taskCount / processCount };
+	size_t rankSizeT{ static_cast<size_t>(rank) };
+	size_t taskStart{ rankSizeT * mapsPerProcess };
+	size_t taskEnd{ (rankSizeT + 1) * mapsPerProcess };
+
+	std::vector<std::string> myTasks(std::next(allTasks.begin(), taskStart),
+			std::next(allTasks.begin(), taskEnd));
+
+	size_t remainderStart{ taskCount - remainder };
+	size_t remainderPos{ remainderStart + rankSizeT };
+	if ( remainderPos < allTasks.size())
+	{
+		myTasks.push_back(allTasks[remainderPos]);
+	}
+
+	return myTasks;
 }

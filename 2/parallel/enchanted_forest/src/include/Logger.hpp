@@ -4,6 +4,8 @@
 
 #include <chrono>
 #include <cstdint>
+#include <fstream>
+#include <filesystem>
 #include <iostream>
 #include <string>
 
@@ -13,6 +15,8 @@
 class Logger
 {
 public:
+	static void print(const std::string& message);
+
 	/**
 	 * @brief Logs info messages with timestamp.
 	 * @param message Message to log.
@@ -32,6 +36,27 @@ public:
 	 */
 	static void error(const std::string& message, const std::exception& e);
 
+	static void initialize();
+
+	/**
+ 	 * @brief Sets internal timer to zero.
+	 */
+	static void setStart();
+
+private:
+	static constexpr char LOG_DIR[8]{"./logs/"};
+
+	static constexpr char LOG_PATH[12]{ "./logs/log_" };
+
+	static constexpr char TXT[5]{".txt"};
+
+	/**
+	 * @brief Determines the time it takes to process each method or action.
+ 	 * @details Method that records the processing time
+	 * @return u_int64_t value
+	 */
+	static u_int64_t duration();
+
 	/**
 	 * @brief Unwinds a nested exception to return the descriptive message of
 	 * the bottom level exception.
@@ -41,41 +66,38 @@ public:
 	static std::string deduce_exception_what(const std::exception& e);
 
 	/**
- 	 * @brief Sets internal timer to zero.
-	 */
-	static void setStart();
-
-private:
-	/**
-	 * @brief Determines the time it takes to process each method or action.
- 	 * @details Method that records the processing time
-	 * @return u_int64_t value
-	 */
-	static u_int64_t duration();
-
-	/**
 	 * @brief Unwinds exception and prints each level.
 	 * @param e Exception to unwind.
 	 * @param level Current unwind depth level.
 	 */
 	static void print_exception(const std::exception& e, int level = 0);
 
+	static std::ofstream file;
+
 	static std::chrono::high_resolution_clock::time_point start;
 };
+
+std::ofstream Logger::file;
 
 std::chrono::high_resolution_clock::time_point Logger::start{
 		std::chrono::high_resolution_clock::now()
 };
 
-void Logger::info(const std::string& message)
+void Logger::print(const std::string& message)
 {
 	std::cout << "[" << duration() << " ms]" << "[INFO]: "
+		 << message << std::endl;
+}
+
+void Logger::info(const std::string& message)
+{
+	file << "[" << duration() << " ms]" << "[INFO]: "
 			  << message << std::endl;
 }
 
 void Logger::error(const std::string& message)
 {
-	std::cerr << "[" << duration() << " ms]" << "[ERROR]: "
+	file << "[" << duration() << " ms]" << "[ERROR]: "
 			  << message << std::endl;
 }
 
@@ -93,7 +115,7 @@ u_int64_t Logger::duration()
 
 void Logger::print_exception(const std::exception& e, int level)
 {
-	std::cerr << "Caused by: " << e.what() << std::endl;
+	file << "Caused by: " << e.what() << std::endl;
 	try
 	{
 		std::rethrow_if_nested(e);
@@ -115,6 +137,20 @@ std::string Logger::deduce_exception_what(const std::exception& e)
 		return deduce_exception_what(ne);
 	}
 	return e.what();
+}
+
+void Logger::initialize()
+{
+	int rank{-1};
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	if(rank == 0) {
+		std::filesystem::remove_all(LOG_DIR);
+		std::filesystem::create_directory(LOG_DIR);
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	file.open(LOG_PATH + std::to_string(rank) + TXT);
 }
 
 void Logger::setStart()
