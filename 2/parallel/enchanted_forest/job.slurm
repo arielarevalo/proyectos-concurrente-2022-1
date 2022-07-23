@@ -9,4 +9,4 @@
 module load gcc /7.2.0
 module load mpich /3.2.1-gcc-7.2.0
 
-mpiexec ./bin/my_executable
+mpiexec ./bin/enchanted_forest ../test/test_set_2/input/job002.txt
