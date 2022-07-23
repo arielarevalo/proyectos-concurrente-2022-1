@@ -182,6 +182,6 @@ en sus salidas, o no.
 
 ### Diagramas
 
-![Diagrama UML](uml.svg)
+![Diagrama UML](Bosque encantado diagrama de clases.svg)
 
 ![Diagrama de Flujo](flowchart.svg)
