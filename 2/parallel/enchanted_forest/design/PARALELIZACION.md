@@ -7,7 +7,9 @@ implementación de la paralelización en este proyecto se caracteriza por la
 naturalidad con la cual se ajusta al diseño serial. El que esto fuera
 posible fue la meta principal a la hora de diseñar el algoritmo serial.
 
-## MPI
+## Diseño Paralelo
+
+### MPI
 
 La concurrencia distribuida implementada se basa en la premisa de que, dados
 varios archivos de entrada grandes, lo preferible es que la lectura de cada
@@ -53,7 +55,7 @@ proceso puede recibir un solo task remanente.
 		myTasks.push(allTasks[remainderPos])
 	}
 
-## OpenMP
+### OpenMP
 
 La concurrencia por hilos implementada aprovecha la estructura de matriz del
 mapa, y la consecuencia que esto conlleva en la existencia de una ubicación
@@ -78,3 +80,22 @@ utilizado para la versión serial.
                 destArea[current] = next // Aplica al nuevo mapa por retornar
             }
         }
+
+## Análisis de Rendimiento
+
+### Metodología
+
+Para todas las mediciones se utilizó el mismo job002.txt, como indica el enunciado. Las mediciones para la versión serial se hicieron de forma local, mientras que todas las mediciones para la versión paralela se hicieron en el clúster Kabré de la UCR, igualmente como indica el enunciado.
+
+### Resultados
+
+Se confirma que todas las versiones siempre retornen el mismo resultado. Los resultados completos para esta sección se pueden hallar en [la hoja de cálculo adjunta](reporte.xlsx).
+
+![Speedup y eficiencia por versión](sepv.png)
+
+Los resultados concuerdan con lo esperado basado en las carácterísticas del tipo de concurrencia implementada. Vemos que `_SC_NPROCESSORS_ONLN` produce un valor de 256 hilos, como es esperado de acuerdo a la especificación del microprocesador. Se llevó a cabo algo de experimentación para determinar cuál sería la configuración óptima de nodos e hilos, tomando en cuenta tanto el speedup como la eficiencia. Particularmente, se hizo uso de una métrica _ad-hoc_ denominada _costo relativo_ para expresar la proporción entre la eficiencia perdida y el speedup para una dada combinación de nodos e hilos. La razón de esto es la siguiente:
+
+En el transcurso del trabajo, la constante ha sido la aserción que `MPI` es particularmente útil cuando se está trabajando sobre una cantidad muy grande de datos, y se tiene acceso de antemano a
+una cantidad muy grande de procesadores. Lo anterior apunta a que se implementa este tipo de concurrencia cuando el tiempo serial de computación es intratable, y se sacrifica, entonces, la eficiencia en aras de llegar a un tiempo de computación funcionalmente aceptable.
+
+Tomando esto en cuenta, el _costo relativo_ permitió observar que, al perderse 90% de eficiencia aún en el caso más leve de paralelización probado _(4x8)_, la pérdida de solamente un 9% adicional en el caso _(8x256)_ no resulta tan severo, proporcionalmente, al lograrse conseguir un speedup 5 veces mayor. La intuición detrás de esta comparación es evidente al observar el gráfico. Esta observación nos permite recontextualizar la eficiencia de 1% obtenida en el caso paralelo como un "mal necesario" resultante del trabajar un problema de escala tal que se llegue a necesitar hacer uso de `MPI`, y lo que puede conllevar, a nivel de logística, un múltiplo entero más o menos de speedup cuando se están trabajando tiempos de ejecución medidos en horas.

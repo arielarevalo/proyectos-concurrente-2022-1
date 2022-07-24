@@ -80,6 +80,8 @@ aaaa---
 
 ## [Diseño](./design/README.md)
 
+## [Análisis de Rendimiento](./design/PARALELIZACION.md#Análisis de Rendimiento)
+
 ## Créditos
 
 El programa fue desarrollado en su totalidad por Ariel Arévalo Alvarado
