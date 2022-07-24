@@ -9,9 +9,16 @@
 #include "./MapFiler.hpp"
 #include "./MapWriter.hpp"
 
+/**
+ * @brief Entry point for the Enchanted Forest algorithm.
+ */
 class EnchantedForest
 {
 public:
+	/**
+	 * @brief Enchanted Forest algorithm. Executes the given job.
+	 * @param jobPath Path to job to execute.
+	 */
 	static void process(const std::string& jobPath);
 };
 

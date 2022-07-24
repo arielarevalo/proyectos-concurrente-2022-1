@@ -1,93 +1,5 @@
 # Diseño Enchanted Forest
 
-## Diseño de la aplicación distribuida-híbrida
-
-El `EnchantedForest` con la versión distribuida-híbrida implementa
-las siguientes tecnologías:
-* `MPI`: Se implenta con el fin de procesar y distribuir los mapas de un
-  determinado job entre los diferentes procesos.
-
-* `OpenMP`: Se implenta con el propósito de procesar cada mapa realizando concurrencia con el
-  objetivo de mejorar el rendimiento de la aplicación.
-
-
-### MPI (Message Passing Interface)
-MPI es una especificación para programación de paso de mensajes, que
-proporciona una librería de funciones para C, C++ o Fortran que son
-empleadas en los programas para comunicar datos entre procesos.
-
-La `descomposición` es identificar unidades de trabajo que se pueden realizar
-de forma independiente, en `EnchantedForest` se determino que las unidades de
-trabajo que se puede realizar de forma independiente es la de resolver un mapa del
-bosque encantado.
-
-El `mapeo` es asignar esas unidades de trabajo a los trabajadores.
-El `mapeo estático por bloque ` asigna rangos continuos de trabajo a
-cada trabajador. Es el mapeo que potencialmente puede disminuir más fallos
-de caché o false sharing.
-
-    int rank{ -1 };
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-	int processCount{ -1 };
-	MPI_Comm_size(MPI_COMM_WORLD, &processCount);
-
-	size_t remainder{ 0 };
-	size_t taskCount{ allTasks.size() };
-	remainder = taskCount % static_cast<size_t>(processCount);
-
-	size_t mapsPerProcess{ taskCount / processCount };
-	size_t rankSizeT{ static_cast<size_t>(rank) };
-	size_t taskStart{ rankSizeT * mapsPerProcess };
-	size_t taskEnd{ (rankSizeT + 1) * mapsPerProcess };
-
-	std::vector<std::string> myTasks(std::next(allTasks.begin(), taskStart),
-			std::next(allTasks.begin(), taskEnd));
-
-	size_t remainderStart{ taskCount - remainder };
-	size_t remainderPos{ remainderStart + rankSizeT };
-	if ( remainderPos < allTasks.size())
-	{
-		myTasks.push_back(allTasks[remainderPos]);
-	}
-
-### OpenMP
-OpenMP es una API para la
-programación multiproceso de memoria compartida en múltiples plataformas.
-Permite añadir concurrencia a los programas escritos en C, C++
-
-La `descomposición` es identificar unidades de trabajo que se pueden realizar
-de forma independiente, en `EnchantedForest` se determino que las unidades de
-trabajo que se puede realizar de forma independiente es la revisar
-por terreno / celda cada una de las reglas existentes creadas por el mago.
-
-El `mapeo` es asignar esas unidades de trabajo a los trabajadores.
-El `El mapeo estático cíclico` asigna al trabajador i todas las
-unidades de trabajo con índice {i,i+w,i+2w,...}.
-
-Cláusulas utilizadas en el `EnchantedForest`
-
-* COLLAPSE: especifica cuántos ciclos en un ciclo anidado deben colapsarse en
-un espacio de iteración grande y dividirse de acuerdo con la cláusula de 
-programación. La ejecución secuencial de las iteraciones en todos los 
-ciclos asociados determina el orden de las iteraciones en el espacio de 
-iteraciones colapsado.
-
-* SCHEDULE(STATIC, 1): significa que los bloques de iteraciones se asignan 
-estáticamente a los subprocesos de ejecución de forma rotativa.
-
-
-    #pragma omp parallel for collapse(2) schedule(static, 1)
-        for (size_t i = 0; i < rows; i++)
-        {
-            for (size_t j = 0; j < cols; j++)
-            {
-                Point current{ i, j };
-                char next{ nextTerrain(current) };
-                destArea[current] = next;
-            }
-        }
-
 ## Requisitos
 
 ### Funcionales:
@@ -182,6 +94,6 @@ en sus salidas, o no.
 
 ### Diagramas
 
-![Diagrama UML](Bosque encantado diagrama de clases.svg)
+![Diagrama UML](uml.svg)
 
-![Diagrama de Flujo](Bosque encantado Diagrama de Flujo.svg)
+![Diagrama de Flujo](flowchart.svg)
