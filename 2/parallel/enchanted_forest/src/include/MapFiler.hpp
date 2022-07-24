@@ -22,12 +22,18 @@
 using Job = std::vector<std::string>;
 
 /**
- * @brief Reads input file to game state and writes to output file with
- * history of best play state.
+ * @brief Handles all files related to the processing of a single job.
+ * @details Stores idiosyncratic input and output paths based on the location
+ * of the initial job file passed to it. A given MapFiler should not be used
+ * to file maps from a different job other than its instantiation job.
  */
 class MapFiler
 {
 public:
+	/**
+	 * @brief Constructs a new MapFiler instance.
+	 * @param jobPath Job for which to file.
+	 */
 	explicit MapFiler(const std::string& jobPath)
 			:
 			jobPath(jobPath), inputPath(parseInputPath(jobPath)),
@@ -35,10 +41,23 @@ public:
 	{
 	}
 
+	/**
+	 * @brief Constructs a list of tasks from the instantiation job.
+	 * @return List of tasks in job file.
+	 */
 	Job parseJob();
 
+	/**
+	 * @brief Constructs a Map object from a task; a line in the job file.
+	 * @param task Task to construct a Map for.
+	 * @return Corresponding Map for the given task.
+	 */
     Map parseMap(const std::string& task);
 
+	/**
+	 * @brief Writes a given map to filesystem.
+	 * @param map Map to write to file.
+	 */
 	void file(const Map& map) const;
 
 private:
@@ -64,10 +83,25 @@ private:
 
 	static constexpr size_t ID_SIZE{ 3 };
 
+	/**
+	 * @brief Determines input path from input job path.
+	 * @param jobPath Job path to set input for.
+	 * @return Input path.
+	 */
 	static std::string parseInputPath(const std::string& jobPath);
 
+	/**
+	 * @brief Determines output path from input job path.
+	 * @param jobPath Job path to set output for.
+	 * @return Output path.
+	 */
 	static std::string parseOutputPath(const std::string& jobPath);
 
+	/**
+	 * @brief Determines tasks for this process from list of all tasks.
+	 * @param allTasks List of all tasks.
+	 * @return Tasks for this process.
+	 */
 	static std::vector<std::string>
 	parseMyTasks(std::vector<std::string>& allTasks);
 

@@ -10,11 +10,15 @@
 #include <string>
 
 /**
- * @brief Logs info and error messages, and unwinds nested exceptions.
+ * @brief Logs info and error messages to file, and unwinds nested exceptions.
  */
 class Logger
 {
 public:
+	/**
+	 * @brief Logs message to console with timestamp.
+	 * @param message Message to log.
+	 */
 	static void print(const std::string& message);
 
 	/**
