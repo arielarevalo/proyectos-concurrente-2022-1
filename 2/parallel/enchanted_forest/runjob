@@ -3,6 +3,5 @@ if [[ "$#" -ne 1 ]]
 then
   echo "One argument for number of tasks is required." >&2
 else
-  ntasks="$1"
-  sbatch --ntasks="$ntasks" --nodes="$ntasks" job.slurm
+  sbatch --ntasks="$1" --nodes="$1" job.slurm
 fi
