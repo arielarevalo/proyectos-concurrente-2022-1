@@ -99,8 +99,20 @@ Los resultados completos para esta sección se pueden hallar en [la hoja de cál
 
 ![Speedup y eficiencia por versión](sepv.png)
 
-* Cree un gráfico que incluya en el eje-x las dos soluciones (serial, 
+* Cree un gráfico que incluya en el eje-x las dos soluciones (serial,
   distribuida), en el eje-y primario el incremento de velocidad, y en el eje-y secundario la eficiencia.
-* Se nota que `_SC_NPROCESSORS_ONLN` produce un valor de 256 hilos, de acuerdo a la especificación del microprocesador.
-* Se nota que, al perderse 90% de eficiencia aún en el caso más leve de paralelización, la pérdida de un 9% adicional
-  no parece ser tan severo, proporcionalmente, al conseguir un speedup 5 veces mayor. Es así 
+
+Los resultados concuerdan con lo esperado basado en las carácterísticas del tipo de concurrencia implementada.
+Vemos que `_SC_NPROCESSORS_ONLN` produce un valor de 256 hilos, como es esperado de acuerdo a la especificación del
+microprocesador. Se llevó a cabo algo de experimentación para determinar cuál sería la configuración óptima de nodos e
+hilos, tomando en cuenta tanto el speedup como la eficiencia. Particularmente, se hizo uso de una métrica _ad-hoc_
+denominada _costo relativo_, para expresar la proporción entre la eficiencia perdida, y el speedup para una dada
+combinación de nodos e hilos. En el transcurso del trabajo, la constante ha sido la aserción que `MPI` es
+particularmente útil cuando se está trabajando sobre una cantidad muy grande de datos, y se tiene acceso de antemano a
+una cantidad muy grande de procesadores. La idea general siendo que se implementa este tipo de concurrencia cuando el
+tiempo serial de computación es intratable. Se sacrifica, entonces, la eficiencia en aras de llegar a un tiempo de
+computación funcionalmente aceptable. Tomando esto en cuenta, el _costo relativo_ permitió observar que, al perderse 90%
+de eficiencia aún en el caso más leve de paralelización, explorado (4x8), la pérdida de solamente un 9% adicional en el
+caso (8x256) no resulta tan severo, proporcionalmente, al lograrse conseguir un speedup 5 veces mayor. Esto logra
+recontextualizar la eficiencia de 1% obtenida en el caso paralelo como simplemente un mal necesario que resulta del
+estar trabajando un problema tan grande que se llega a necesitar de `MPI` del todo.
