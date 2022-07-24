@@ -92,7 +92,9 @@ número total de iteraciones por ser procesadas, eso además de guardar la
 información sobre si el linaje representado por objeto requiere trazabilidad 
 en sus salidas, o no.
 
-### Diagramas
+## [Paralelización](./PARALELIZACION.md)
+
+## Diagramas
 
 ![Diagrama UML](uml.svg)
 
