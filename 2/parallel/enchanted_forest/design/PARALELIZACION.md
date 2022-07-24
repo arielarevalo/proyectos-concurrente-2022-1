@@ -83,36 +83,19 @@ utilizado para la versión serial.
 
 ## Análisis de Rendimiento
 
-## Metodología
+### Metodología
 
-Para todas las mediciones se utilizó el mismo job002.txt, como indica el enunciado. Las mediciones para la versión
-serial se hicieron de forma local, mientras que todas las mediciones para la versión paralela se hicieron en el clúster
-Kabré de la UCR, igualmente como indica el enunciado.
+Para todas las mediciones se utilizó el mismo job002.txt, como indica el enunciado. Las mediciones para la versión serial se hicieron de forma local, mientras que todas las mediciones para la versión paralela se hicieron en el clúster Kabré de la UCR, igualmente como indica el enunciado.
 
-## Resultados
+### Resultados
 
-Se confirma que todas las versiones siempre retornen el mismo resultado.
-
-### Comparación de optimizaciones
-
-Los resultados completos para esta sección se pueden hallar en [la hoja de cálculo adjunta](reporte.xlsx).
+Se confirma que todas las versiones siempre retornen el mismo resultado. Los resultados completos para esta sección se pueden hallar en [la hoja de cálculo adjunta](reporte.xlsx).
 
 ![Speedup y eficiencia por versión](sepv.png)
 
-* Cree un gráfico que incluya en el eje-x las dos soluciones (serial,
-  distribuida), en el eje-y primario el incremento de velocidad, y en el eje-y secundario la eficiencia.
+Los resultados concuerdan con lo esperado basado en las carácterísticas del tipo de concurrencia implementada. Vemos que `_SC_NPROCESSORS_ONLN` produce un valor de 256 hilos, como es esperado de acuerdo a la especificación del microprocesador. Se llevó a cabo algo de experimentación para determinar cuál sería la configuración óptima de nodos e hilos, tomando en cuenta tanto el speedup como la eficiencia. Particularmente, se hizo uso de una métrica _ad-hoc_ denominada _costo relativo_ para expresar la proporción entre la eficiencia perdida y el speedup para una dada combinación de nodos e hilos. La razón de esto es la siguiente:
 
-Los resultados concuerdan con lo esperado basado en las carácterísticas del tipo de concurrencia implementada.
-Vemos que `_SC_NPROCESSORS_ONLN` produce un valor de 256 hilos, como es esperado de acuerdo a la especificación del
-microprocesador. Se llevó a cabo algo de experimentación para determinar cuál sería la configuración óptima de nodos e
-hilos, tomando en cuenta tanto el speedup como la eficiencia. Particularmente, se hizo uso de una métrica _ad-hoc_
-denominada _costo relativo_, para expresar la proporción entre la eficiencia perdida, y el speedup para una dada
-combinación de nodos e hilos. En el transcurso del trabajo, la constante ha sido la aserción que `MPI` es
-particularmente útil cuando se está trabajando sobre una cantidad muy grande de datos, y se tiene acceso de antemano a
-una cantidad muy grande de procesadores. La idea general siendo que se implementa este tipo de concurrencia cuando el
-tiempo serial de computación es intratable. Se sacrifica, entonces, la eficiencia en aras de llegar a un tiempo de
-computación funcionalmente aceptable. Tomando esto en cuenta, el _costo relativo_ permitió observar que, al perderse 90%
-de eficiencia aún en el caso más leve de paralelización, explorado (4x8), la pérdida de solamente un 9% adicional en el
-caso (8x256) no resulta tan severo, proporcionalmente, al lograrse conseguir un speedup 5 veces mayor. Esto logra
-recontextualizar la eficiencia de 1% obtenida en el caso paralelo como simplemente un mal necesario que resulta del
-estar trabajando un problema tan grande que se llega a necesitar de `MPI` del todo.
+En el transcurso del trabajo, la constante ha sido la aserción que `MPI` es particularmente útil cuando se está trabajando sobre una cantidad muy grande de datos, y se tiene acceso de antemano a
+una cantidad muy grande de procesadores. Lo anterior apunta a que se implementa este tipo de concurrencia cuando el tiempo serial de computación es intratable, y se sacrifica, entonces, la eficiencia en aras de llegar a un tiempo de computación funcionalmente aceptable.
+
+Tomando esto en cuenta, el _costo relativo_ permitió observar que, al perderse 90% de eficiencia aún en el caso más leve de paralelización probado _(4x8)_, la pérdida de solamente un 9% adicional en el caso _(8x256)_ no resulta tan severo, proporcionalmente, al lograrse conseguir un speedup 5 veces mayor. La intuición detrás de esta comparación es evidente al observar el gráfico. Esta observación nos permite recontextualizar la eficiencia de 1% obtenida en el caso paralelo como un "mal necesario" resultante del trabajar un problema de escala tal que se llegue a necesitar hacer uso de `MPI`, y lo que puede conllevar, a nivel de logística, un múltiplo entero más o menos de speedup cuando se están trabajando tiempos de ejecución medidos en horas.
