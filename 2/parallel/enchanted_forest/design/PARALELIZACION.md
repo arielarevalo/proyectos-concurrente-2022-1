@@ -95,20 +95,12 @@ Se confirma que todas las versiones siempre retornen el mismo resultado.
 
 ### Comparación de optimizaciones
 
-Los resultados completos para esta sección se pueden hallar en [la hoja de cálculo adjunta](./analisis/reporte.xlsx).
+Los resultados completos para esta sección se pueden hallar en [la hoja de cálculo adjunta](reporte.xlsx).
 
-![Tiempo por versión](./analisis/tpv.png) ![Speedup y eficiencia por versión](./analisis/sepv.png)
+![Speedup y eficiencia por versión](sepv.png)
 
-Lo que observamos parcialmente concuerda con lo que se esperaría según lo visto de momento en el curso. En cuanto al
-speedup, observamos que la versión _Pthreads_ presenta una leve ventaja sobre la versión _OpenMP_, esto dado
-probablemente al hecho de que, mientras la versión _Pthreads_ presenta concurrencia definida al momento de compilar, _
-OpenMP_ define la concurrencia durante la ejecución. Dado que la diferencia es leve, y el algoritmo por iteración dentro
-del `for` alrededor del cual se define el único uso de _OpenMP_ es efectivamente idéntico al `run()` dentro de cada hilo
-en la versión _Pthreads_, este trabajo que se requiere para definir la concurrencia en cada iteración debería
-representar, en conjunto, la totalidad de la diferencia en tiempo de ejecución entre estas versiones.
-
-Por otro lado, en cuanto a la comparación entre las versiones concurrentes y la serial, observamos que la eficiencia
-está anormalmente por encima de uno. Esto debido a que han habido cambios sustanciales en el algoritmo entre su
-iteración serial, y su primera iteración concurrente, debido a la incapacidad del estudiante para entregar una versión
-concurrente funcional a base del algoritmo de la versión serial inicialmente. Los cambios requeridos para hacer el
-algoritmo funcional de forma concurrente problamente llegaron a accidentalmente optimizar la implementación.
+* Cree un gráfico que incluya en el eje-x las dos soluciones (serial, 
+  distribuida), en el eje-y primario el incremento de velocidad, y en el eje-y secundario la eficiencia.
+* Se nota que `_SC_NPROCESSORS_ONLN` produce un valor de 256 hilos, de acuerdo a la especificación del microprocesador.
+* Se nota que, al perderse 90% de eficiencia aún en el caso más leve de paralelización, la pérdida de un 9% adicional
+  no parece ser tan severo, proporcionalmente, al conseguir un speedup 5 veces mayor. Es así 
